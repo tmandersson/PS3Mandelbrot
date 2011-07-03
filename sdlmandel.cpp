@@ -1,6 +1,7 @@
 // sdlmandel.cpp
 #include <iostream>
 #include "sdlmandel.h"
+#include <SDL/SDL.h>
 using std::cerr;
 
 SDLMandel::SDLMandel(unsigned int iterations, int w, int h)
@@ -25,7 +26,7 @@ SDLMandel::SDLMandel(unsigned int iterations, int w, int h)
 
 SDLMandel::~SDLMandel()
 {
-	SDL_Quit();
+  SDL_Quit();
 }
 
 void SDLMandel::plot(int x, int y, int color)

@@ -1,6 +1,3 @@
-// sdlmandel.h
-#ifndef _sdlmandel_h_
-#define _sdlmandel_h_
 #include "SDL/SDL.h"
 #include "mandel.h"
 
@@ -21,4 +18,3 @@ class SDLMandel : public Mandel
 		
 		void putpixel(SDL_Surface *surface, int x, int y, Uint32 pixel);
 };
-#endif // _sdlmandel_h_
