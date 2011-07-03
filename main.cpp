@@ -3,16 +3,16 @@
 #include <iostream>
 using namespace std;
 
-const int Screenwidth = 500;
-const int Screenheight = 500;
-const int Maxiterations = 500;
+const int WIDTH = 1280;
+const int HEIGHT = 720;
+const unsigned int ITERATIONS = 500;
 
 int main(int argc, char *argv[])
 {
-	SDLMandel mand;
+  SDLMandel mand = SDLMandel(ITERATIONS, WIDTH, HEIGHT);
 
-	mand.zoom(-2.0, 0.6, -1.3, 1.3);
-	char test;
-	cin >> test;
+  mand.zoom(-3.0, 1.6, -1.3, 1.3);
+  char test;
+  cin >> test;
 }
 

@@ -77,20 +77,17 @@ void Mandel::zoom_cord(int fromx, int fromy, int tox, int toy)
    double newminre, newmaxre, newminim, newmaxim;
    
    // calculate new view range
-   if (tox > fromx && toy > fromy) 
-	{
-		double xstep = (maxre - minre) / width;
-      double ystep = xstep;
-	   // or ystep = (maxim - minim) / height if we allow the scales to be
-		// unproportional
-		
-      // we're using the x-coordinates to make a square area to zoom in		
-      newminre = minre + fromx * xstep;
-      newmaxre = maxre - (width - tox) * xstep;
-      newminim = minim + (height - (fromy + tox - fromx)) * ystep;
-      newmaxim = maxim - fromy * ystep;
-      // zoom with the new values
-      zoom(newminre, newmaxre, newminim, newmaxim);
+   if (tox > fromx && toy > fromy) {
+     double xstep = (maxre - minre) / width;
+     double ystep = (maxim - minim) / height;
+     
+     newminre = minre + fromx * xstep;
+     newmaxre = maxre - (width - tox) * xstep;
+     newminim = minim + (height - (fromy + tox - fromx)) * ystep;
+     newmaxim = maxim - fromy * ystep;
+
+     // zoom with the new values
+     zoom(newminre, newmaxre, newminim, newmaxim);
    }
 }
 
