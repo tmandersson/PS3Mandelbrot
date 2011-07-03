@@ -1,4 +1,4 @@
-// main.cpp
+// Main.cpp
 #include "sdlmandel.h"
 #include <iostream>
 using namespace std;
@@ -15,4 +15,3 @@ int main(int argc, char *argv[])
   char test;
   cin >> test;
 }
-
