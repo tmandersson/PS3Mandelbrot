@@ -4,8 +4,8 @@
 #include <SDL/SDL.h>
 using std::cerr;
 
-SDLMandel::SDLMandel(unsigned int iterations, int w, int h)
-  : Mandel(iterations, w, h)
+SDLMandel::SDLMandel(unsigned int iterations, int w, int h, IPlotter &plotter)
+  : Mandel(iterations, w, h), m_plotter(plotter)
 {
   // Initialize defaults, Video
   if ((SDL_Init(SDL_Init(SDL_INIT_VIDEO))==-1)) {
@@ -31,29 +31,43 @@ SDLMandel::~SDLMandel()
 
 void SDLMandel::plot(int x, int y, int color)
 {
+  m_plotter.plot(x, y, color);
+}
+
+SDLPlotter::SDLPlotter(SDL_Surface *surface, 
+		       int w, int h,
+		       int palette[3][256]) : IPlotter() {
+  m_surface = surface;
+  m_palette = palette;
+  width = w;
+  height = h;
+}
+
+void SDLPlotter::plot(int x, int y, int color)
+{
   if (x == 0 && y == 0) {
     // lock the screen
-    if (SDL_LockSurface(pScreen) != 0) {
+    if (SDL_LockSurface(m_surface) != 0) {
       cerr << "Can't get access to screen!!\n";
       SDL_Quit();
       exit(1);
     }
   }
 	
-  putpixel(pScreen, x, y, SDL_MapRGB(pScreen->format, m_palette[0][color], 
+  putpixel(m_surface, x, y, SDL_MapRGB(m_surface->format, m_palette[0][color], 
 				     m_palette[1][color], 
 				     m_palette[2][color]));
   if (x == width - 1 && y == height - 1)
     {
-      SDL_UnlockSurface(pScreen);
-      SDL_UpdateRect(pScreen, 0, 0, width, height);
+      SDL_UnlockSurface(m_surface);
+      SDL_UpdateRect(m_surface, 0, 0, width, height);
     }
 }
 	
 
 // Set the pixel at (x, y) to the given value
 // NOTE: The surface must be locked before calling this!
-void SDLMandel::putpixel(SDL_Surface *surface, int x, int y, Uint32 pixel)
+void SDLPlotter::putpixel(SDL_Surface *surface, int x, int y, Uint32 pixel)
 {
   int bpp = surface->format->BytesPerPixel;
   // Here p is the address to the pixel we want to set
