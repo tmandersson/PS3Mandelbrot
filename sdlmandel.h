@@ -1,4 +1,4 @@
-#include "SDL/SDL.h"
+#include <SDL/SDL.h>
 #include "mandel.h"
 
 class SDLMandel : public Mandel {

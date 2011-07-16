@@ -8,6 +8,34 @@ const int HEIGHT = 720;
 const unsigned int ITERATIONS = 500;
 
 int m_palette[3][256];
+void create_palette();
+
+int main(int argc, char *argv[])
+{
+  create_palette();
+
+  // Initialise defaults, Video
+  if ((SDL_Init(SDL_Init(SDL_INIT_VIDEO))==-1)) {
+    cerr << "Could not initialise SDL: " << SDL_GetError() << ".\n";
+    exit(1);
+  }
+
+  // Initialise the display
+  // requesting a hardware surface
+  SDL_Surface *surface = SDL_SetVideoMode(WIDTH, HEIGHT, 32, SDL_HWSURFACE);
+  if ( surface == NULL ) {
+    cerr << "Couldn't set " << WIDTH << "x" << HEIGHT << "x32 video mode: "
+	 << SDL_GetError() << ".\n";
+    exit(1);
+  }
+
+  SDLPlotter plotter = SDLPlotter(surface, WIDTH, HEIGHT, m_palette);
+  SDLMandel mand = SDLMandel(ITERATIONS, WIDTH, HEIGHT, plotter);
+
+  mand.zoom(-3.0, 1.6, -1.3, 1.3);
+  char test;
+  cin >> test;
+}
 
 void create_palette()
 {
@@ -58,29 +86,3 @@ void create_palette()
     }
 }
 
-int main(int argc, char *argv[])
-{
-  create_palette();
-  
-  // Initialize defaults, Video
-  if ((SDL_Init(SDL_Init(SDL_INIT_VIDEO))==-1)) {
-    cerr << "Could not initialize SDL: " << SDL_GetError() << ".\n";
-    exit(1);
-  }
-	
-  // Initialize the display
-  // requesting a hardware surface
-  SDL_Surface *surface = SDL_SetVideoMode(WIDTH, HEIGHT, 32, SDL_HWSURFACE);
-  if ( surface == NULL ) {
-    cerr << "Couldn't set " << WIDTH << "x" << HEIGHT << "x32 video mode: " 
-	 << SDL_GetError() << ".\n";
-    exit(1);
-  }
-
-  SDLPlotter plotter = SDLPlotter(surface, WIDTH, HEIGHT, m_palette);
-  SDLMandel mand = SDLMandel(ITERATIONS, WIDTH, HEIGHT, plotter);
-
-  mand.zoom(-3.0, 1.6, -1.3, 1.3);
-  char test;
-  cin >> test;
-}
