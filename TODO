@@ -1,4 +1,0 @@
-Changes to be done for version 0.2:
-* Clean-up code to follow C++ standards a LOT more.
-* Implement abstraction layer for using multiple graphics libs.
-* Implement SDL in addition to QT.
