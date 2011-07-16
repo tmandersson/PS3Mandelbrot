@@ -1,2 +1,5 @@
 *.o
 mandel
+.cproject
+.project
+Debug
