@@ -1,5 +1,3 @@
-#include <ppu-lv2.h>
-
 #include <stdio.h>
 #include <stdarg.h>
 #include <stdlib.h>
