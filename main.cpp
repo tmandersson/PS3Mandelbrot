@@ -1,6 +1,7 @@
 // Main.cpp
-#include "sdlmandel.h"
+#include "mandel.h"
 #include "sdlplotter.h"
+#include <SDL/SDL.h>
 #include <iostream>
 using namespace std;
 
@@ -31,7 +32,7 @@ int main(int argc, char *argv[])
   }
 
   SDLPlotter plotter = SDLPlotter(surface, WIDTH, HEIGHT, m_palette);
-  SDLMandel mand = SDLMandel(ITERATIONS, WIDTH, HEIGHT, plotter);
+  Mandel mand = Mandel(ITERATIONS, WIDTH, HEIGHT, plotter);
 
   mand.zoom(-3.0, 1.6, -1.3, 1.3);
   char test;

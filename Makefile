@@ -6,15 +6,13 @@ CPPFLAGS = -Wall -O3
 
 all : mandel
 
-mandel : main.o mandel.o sdlmandel.o sdlplotter.o
-	$(CC) $(CPPFLAGS) -o mandel main.o mandel.o sdlmandel.o sdlplotter.o `sdl-config --libs`
+mandel : main.o mandel.o sdlplotter.o
+	$(CC) $(CPPFLAGS) -o mandel main.o mandel.o sdlplotter.o `sdl-config --libs`
 
 main.o : main.cpp
 	$(CC) $(CPPFLAGS) -c main.cpp 
 mandel.o : mandel.cpp
 	 $(CC) $(CPPFLAGS) -c mandel.cpp
-sdlmandel.o : sdlmandel.cpp mandel.o
-	   $(CC) $(CPPFLAGS) -c sdlmandel.cpp
 sdlplotter.o : sdlplotter.cpp
 	   $(CC) $(CPPFLAGS) -c sdlplotter.cpp
 	   

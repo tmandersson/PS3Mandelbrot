@@ -1,4 +1,5 @@
-#include "sdlmandel.h"
+#include "mandel.h"
+#include <SDL/SDL.h>
 
 #ifndef SDLPLOTTER_H_
 #define SDLPLOTTER_H_
