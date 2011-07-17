@@ -18,7 +18,8 @@ export BUILDDIR	:=	$(CURDIR)/ps3_build
 #---------------------------------------------------------------------------------
 # any extra libraries we wish to link with the project
 #---------------------------------------------------------------------------------
-LIBS	:=	-lgcm_sys -lrsx -lsysutil -lio -lm -lfreetype -lrt -llv2
+LIBS	:=	-lrsx -lgcm_sys -lsysutil -lio
+#-lgcm_sys -lrsx -lsysutil -lio -lm -lfreetype -lrt -llv2
 
 #---------------------------------------------------------------------------------
 # list of directories containing libraries, this must be the top level containing
