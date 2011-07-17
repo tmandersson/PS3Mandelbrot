@@ -5,12 +5,4 @@
 using std::cerr;
 
 SDLMandel::SDLMandel(unsigned int iterations, int w, int h, IPlotter &plotter)
-  : Mandel(iterations, w, h), m_plotter(plotter)
-{
-  zoom_start();
-}
-
-void SDLMandel::plot(int x, int y, int color)
-{
-  m_plotter.plot(x, y, color);
-}
+  : Mandel(iterations, w, h, plotter), m_plotter(plotter) {}

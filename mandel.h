@@ -11,12 +11,11 @@ class IPlotter {
 
 class Mandel {
  public:
-  Mandel( unsigned int iterations = 100, int w = 640, int h = 480);
+  Mandel( unsigned int iterations, int w, int h, IPlotter &plotter);
   virtual ~Mandel() { }
    
   void zoom(double minr, double maxr, double mini, double maxi);
   void zoom_back(); // zoom back one step
-  void zoom_start(); // zoom to the start coords
    
  protected:
   int width, height;
@@ -30,8 +29,10 @@ class Mandel {
    
   // zoom to pixel cords
   void zoom_cord(int fromx, int fromy, int tox, int toy); 
-  virtual void plot(int x, int y, int color) = 0; // plots pixel
+
  private:
+  IPlotter &m_plotter;
+
   // old coords (for zooming back one step)
   // implement stack of coords?
   double oldminre, oldmaxre, oldminim, oldmaxim;

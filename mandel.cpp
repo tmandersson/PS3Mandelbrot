@@ -6,7 +6,7 @@ const double MinImag = -1.3;
 const double MaxImag = 1.3;
 
 Mandel::Mandel( unsigned int iterations,
-		int w, int h)
+		int w, int h, IPlotter &plotter) : m_plotter(plotter)
 {
   width = w;
   height = h;
@@ -47,10 +47,10 @@ void Mandel::calcmandel()
 			
 	  // plot the pixel if it doesn't belong to the Mandel set
 	  if ( (c_iterations = mandeliteration(pos, maxiter)) )	       
-	    plot(x, y, (c_iterations * colorconst) < 1 
+	    m_plotter.plot(x, y, (c_iterations * colorconst) < 1
 		 ? 1: (int) (c_iterations * colorconst));
 	  else
-	    plot(x, y, 0);
+	    m_plotter.plot(x, y, 0);
 	}
     }
 }
@@ -103,13 +103,7 @@ void Mandel::zoom_back()
     }
 }
 
-void Mandel::zoom_start()
-{
-  if (minre != MinReal && maxre != MaxReal)
-    zoom(MinReal, MaxReal, MinImag, MaxImag);
-}
-
-// Iterate Zn+1 = Zn² + C till we now if the iterations is gonna reach infinity
+// Iterate Zn+1 = Znï¿½ + C till we now if the iterations is gonna reach infinity
 // or not.
 // If we don't reach infinity then the function returns the number of 
 // iterations that were needed and the complex constant C belongs to the 
