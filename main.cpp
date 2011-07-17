@@ -1,5 +1,6 @@
 // Main.cpp
 #include "sdlmandel.h"
+#include "sdlplotter.h"
 #include <iostream>
 using namespace std;
 

@@ -1,3 +1,6 @@
+#ifndef MANDEL_H_
+#define MANDEL_H_
+
 #include <complex>
 typedef std::complex<double> complex;
 
@@ -36,7 +39,4 @@ class Mandel {
   unsigned int mandeliteration(complex &c, unsigned int maxiteration);
 };
 
-class IPlotter {
- public:
-  virtual void plot(int x, int y, int color) = 0;
-};
+#endif /* MANDEL_H_ */
