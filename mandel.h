@@ -4,6 +4,11 @@
 #include <complex>
 typedef std::complex<double> complex;
 
+class IPlotter {
+ public:
+  virtual void plot(int x, int y, int color) = 0;
+};
+
 class Mandel {
  public:
   Mandel( unsigned int iterations = 100, int w = 640, int h = 480);

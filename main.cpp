@@ -36,6 +36,8 @@ int main(int argc, char *argv[])
   mand.zoom(-3.0, 1.6, -1.3, 1.3);
   char test;
   cin >> test;
+
+  SDL_Quit();
 }
 
 void create_palette()
