@@ -1,7 +1,10 @@
 *.o
 mandel
 sdl_mandel
-mandel.elf
+*.elf
+*.self
+*.pkg
+ps3_build
 
 .cproject
 .project
