@@ -1,7 +1,7 @@
 # C/C++ compiler
 CC = g++
 
-CPPFLAGS = -Wall -O3 -march=athlon-tbird
+CPPFLAGS = -Wall -O3
 
 
 all : mandel
