@@ -19,16 +19,9 @@ class Mandel {
    
  protected:
   int width, height;
-   
-  // Array with colors. Should really be handled internally by the class.
-  int m_palette[3][256]; // RGB
-
   bool havepainted; // Is set to True at start of plotting
-
   void calcmandel(); // plot/calc the mandelbrot set
-   
-  // zoom to pixel cords
-  void zoom_cord(int fromx, int fromy, int tox, int toy); 
+  void zoom_cord(int fromx, int fromy, int tox, int toy);  // zoom to pixel cords
 
  private:
   IPlotter &m_plotter;
@@ -37,11 +30,8 @@ class Mandel {
   // implement stack of coords?
   double oldminre, oldmaxre, oldminim, oldmaxim;
   double minre, maxre, minim, maxim;
-   
   unsigned int maxiter;
    
-  // create palette called "cold fusion"
-  void set_m_palette();
   unsigned int mandeliteration(complex &c, unsigned int maxiteration);
 };
 
