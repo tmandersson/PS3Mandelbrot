@@ -1,4 +1,3 @@
-// Main.cpp
 #include "mandel.h"
 #include "sdlplotter.h"
 #include <SDL/SDL.h>
@@ -12,24 +11,12 @@ const unsigned int ITERATIONS = 500;
 int m_palette[3][256];
 void create_palette();
 
+SDL_Surface *InitSDL();
+
 int main(int argc, char *argv[])
 {
   create_palette();
-
-  // Initialise defaults, Video
-  if ((SDL_Init(SDL_Init(SDL_INIT_VIDEO))==-1)) {
-    cerr << "Could not initialise SDL: " << SDL_GetError() << ".\n";
-    exit(1);
-  }
-
-  // Initialise the display
-  // requesting a hardware surface
-  SDL_Surface *surface = SDL_SetVideoMode(WIDTH, HEIGHT, 32, SDL_HWSURFACE);
-  if ( surface == NULL ) {
-    cerr << "Couldn't set " << WIDTH << "x" << HEIGHT << "x32 video mode: "
-	 << SDL_GetError() << ".\n";
-    exit(1);
-  }
+  SDL_Surface *surface = InitSDL();
 
   SDLPlotter plotter = SDLPlotter(surface, WIDTH, HEIGHT, m_palette);
   Mandel mand = Mandel(ITERATIONS, WIDTH, HEIGHT, plotter);
@@ -90,3 +77,20 @@ void create_palette()
     }
 }
 
+SDL_Surface *InitSDL()
+{
+    // Initialise defaults, Video
+    if ((SDL_Init(SDL_Init(SDL_INIT_VIDEO))==-1)) {
+    cerr << "Could not initialise SDL: " << SDL_GetError() << ".\n";
+    exit(1);
+  }
+    // Initialise the display
+    // requesting a hardware surface
+    SDL_Surface *surface = SDL_SetVideoMode(WIDTH, HEIGHT, 32, SDL_HWSURFACE);
+    if ( surface == NULL ) {
+    cerr << "Couldn't set " << WIDTH << "x" << HEIGHT << "x32 video mode: "
+	 << SDL_GetError() << ".\n";
+    exit(1);
+  }
+    return surface;
+}
