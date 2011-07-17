@@ -21,8 +21,12 @@ CC = g++
 CPPFLAGS = -Wall -O3
 #-- End C/C++ linux sdl stuff -----------------------------------------
 
-all : sdl_mandel
+all : sdl_mandel ps3
 ps3 : mandel.self mandel.pkg
+
+run:
+	ps3load mandel.self
+
 
 mandel.self : mandel.elf
 
