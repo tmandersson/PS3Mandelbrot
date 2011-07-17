@@ -14,6 +14,25 @@ PS3_CFLAGS = -O2 -Wall -mcpu=cell $(MACHDEP) $(INCLUDE)
 export LD	:=	$(CXX)
 LDFLAGS		=	$(MACHDEP) -Wl,-Map,$(notdir $@).map
 export BUILDDIR	:=	$(CURDIR)/ps3_build
+
+#---------------------------------------------------------------------------------
+# any extra libraries we wish to link with the project
+#---------------------------------------------------------------------------------
+LIBS	:=	-lgcm_sys -lrsx -lsysutil -lio -lm -lfreetype -lrt -llv2
+
+#---------------------------------------------------------------------------------
+# list of directories containing libraries, this must be the top level containing
+# include and lib
+#---------------------------------------------------------------------------------
+LIBDIRS	:= $(PORTLIBS)
+
+#---------------------------------------------------------------------------------
+# build a list of include paths
+#---------------------------------------------------------------------------------
+export INCLUDE	:=	$(foreach dir,$(INCLUDES), -I$(CURDIR)/$(dir)) \
+					$(foreach dir,$(LIBDIRS),-I$(dir)/include) \
+					$(LIBPSL1GHT_INC) \
+					-I$(CURDIR)/$(BUILD)
 #-- END PS3/PSL1GHT stuff -----------------------------------------
 
 #-- C/C++ linux sdl stuff -----------------------------------------
@@ -30,11 +49,14 @@ run:
 
 mandel.self : mandel.elf
 
-mandel.elf : ps3_main.o
-	$(PS3_CC) $(PS3_CFLAGS) -o mandel.elf ps3_main.o
+mandel.elf : ps3_main.o rsxutil.o
+	$(PS3_CC) $(PS3_CFLAGS) -o mandel.elf ps3_main.o rsxutil.o $(LIBS)
 	
 ps3_main.o : ps3_main.cpp
 	$(PS3_CC) $(PS3_CFLAGS) -c ps3_main.cpp
+
+rsxutil.o : rsxutil.c
+	$(PS3_CC) $(PS3_CFLAGS) -c rsxutil.c
 
 sdl_mandel : sdl_main.o mandel.o sdlplotter.o palette.o
 	$(CC) $(CPPFLAGS) -o sdl_mandel sdl_main.o mandel.o sdlplotter.o palette.o `sdl-config --libs`
