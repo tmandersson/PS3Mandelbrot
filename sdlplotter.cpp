@@ -5,9 +5,8 @@ using std::cerr;
 
 SDLPlotter::SDLPlotter(SDL_Surface *surface,
 		       int w, int h,
-		       int palette[3][256]) : IPlotter() {
+		       Palette &palette) : IPlotter(), _palette(palette) {
   m_surface = surface;
-  m_palette = palette;
   width = w;
   height = h;
 }
@@ -23,9 +22,10 @@ void SDLPlotter::plot(int x, int y, int color)
     }
   }
 
-  putpixel(m_surface, x, y, SDL_MapRGB(m_surface->format, m_palette[0][color],
-				     m_palette[1][color],
-				     m_palette[2][color]));
+  putpixel(m_surface, x, y, SDL_MapRGB(m_surface->format,
+		  _palette.GetR(color),
+		  _palette.GetG(color),
+		  _palette.GetB(color)));
   if (x == width - 1 && y == height - 1)
     {
       SDL_UnlockSurface(m_surface);
