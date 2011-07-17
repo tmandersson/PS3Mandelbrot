@@ -12,7 +12,6 @@ SDL_Surface *InitSDL();
 
 int main(int argc, char *argv[])
 {
-  create_palette();
   SDL_Surface *surface = InitSDL();
 
   Palette palette = Palette();
