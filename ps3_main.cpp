@@ -6,7 +6,6 @@
 #include <assert.h>
 #include <unistd.h>
 
-#include <sysutil/sysutil.h>
 #include <sysutil/video.h>
 #include <rsx/gcm_sys.h>
 #include <rsx/rsx.h>
@@ -19,27 +18,17 @@
 void drawFrame(rsxBuffer*, long);
 void plot(rsxBuffer*, int, int, int);
 
-
-void program_exit_callback();
-void sysutil_exit_callback(u64, u64, void*);
-void release_all();
-void finalize();
-
-gcmContextData *context;
-rsxBuffer buffers[MAX_BUFFERS];
-void *host_addr = NULL;
-
 int main(s32 argc, const char* argv[])
 {
+  gcmContextData *context;
+  void *host_addr = NULL;
+  rsxBuffer buffers[MAX_BUFFERS];
   int currentBuffer = 0;
   padInfo padinfo;
   padData paddata;
   u16 width;
   u16 height;
   int i;
-
-  atexit(program_exit_callback);
-  sysUtilRegisterCallback(SYSUTIL_EVENT_SLOT0, sysutil_exit_callback, NULL);
 
   printf("Running Mandel video test!\n");
 	
@@ -87,14 +76,19 @@ int main(s32 argc, const char* argv[])
     }
   }
   
-end:
+ end:
 
-	sysUtilUnregisterCallback(SYSUTIL_EVENT_SLOT0);
-	finalize();
+  gcmSetWaitFlip(context);
+  for (i = 0; i < MAX_BUFFERS; i++)
+    rsxFree(buffers[i].ptr);
+
+  rsxFinish(context, 1);
+  free(host_addr);
+  ioPadEnd();
+
+  printf("Exiting!\n");
 	
-	printf("Exiting through main()...\n");
-
-	return 0;
+  return 0;
 }
 
 void drawFrame(rsxBuffer *buffer, long frame) {
@@ -110,38 +104,4 @@ void drawFrame(rsxBuffer *buffer, long frame) {
 
 void plot(rsxBuffer *buffer, int x, int y, int color) {
 	buffer->ptr[y * buffer->width + x] = color;
-}
-
-void finalize()
-{
-	  gcmSetWaitFlip(context);
-	  int i;
-	  for (i = 0; i < MAX_BUFFERS; i++)
-	    rsxFree(buffers[i].ptr);
-
-	  rsxFinish(context, 1);
-	  free(host_addr);
-	  ioPadEnd();
-
-	  printf("Finalizing!\n");
-}
-
-void program_exit_callback()
-{
-	finalize();
-}
-
-void sysutil_exit_callback(u64 status,u64 param,void *usrdata)
-{
-	switch(status) {
-		case SYSUTIL_EXIT_GAME:
-			sysUtilUnregisterCallback(SYSUTIL_EVENT_SLOT0);
-			printf("Exiting through exit game event...\n");
-			break;
-		case SYSUTIL_DRAW_BEGIN:
-		case SYSUTIL_DRAW_END:
-			break;
-		default:
-			break;
-	}
 }
