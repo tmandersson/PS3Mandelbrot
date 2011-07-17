@@ -4,13 +4,13 @@ CC = g++
 CPPFLAGS = -Wall -O3
 
 
-all : mandel
+all : sdl_mandel
 
-mandel : main.o mandel.o sdlplotter.o palette.o
-	$(CC) $(CPPFLAGS) -o mandel main.o mandel.o sdlplotter.o palette.o `sdl-config --libs`
+sdl_mandel : sdl_main.o mandel.o sdlplotter.o palette.o
+	$(CC) $(CPPFLAGS) -o sdl_mandel sdl_main.o mandel.o sdlplotter.o palette.o `sdl-config --libs`
 
-main.o : main.cpp
-	$(CC) $(CPPFLAGS) -c main.cpp 
+sdl_main.o : sdl_main.cpp
+	$(CC) $(CPPFLAGS) -c sdl_main.cpp 
 mandel.o : mandel.cpp
 	 $(CC) $(CPPFLAGS) -c mandel.cpp
 sdlplotter.o : sdlplotter.cpp
@@ -21,4 +21,4 @@ palette.o : palette.cpp
 clean : clean-all
 
 clean-all:
-	  -rm -f mandel *.o
+	  -rm -f sdl_mandel *.o
