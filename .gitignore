@@ -1,6 +1,8 @@
 *.o
 mandel
 sdl_mandel
+mandel.elf
+
 .cproject
 .project
 Debug

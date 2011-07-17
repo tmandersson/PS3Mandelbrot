@@ -6,6 +6,12 @@ CPPFLAGS = -Wall -O3
 
 all : sdl_mandel
 
+mandel.elf : ps3_main.o
+	$(CC) $(CPPFLAGS) -o mandel.elf ps3_main.o
+	
+ps3_main.o : ps3_main.cpp
+	$(CC) $(CPPFLAGS) -c ps3_main.cpp
+
 sdl_mandel : sdl_main.o mandel.o sdlplotter.o palette.o
 	$(CC) $(CPPFLAGS) -o sdl_mandel sdl_main.o mandel.o sdlplotter.o palette.o `sdl-config --libs`
 
@@ -21,4 +27,4 @@ palette.o : palette.cpp
 clean : clean-all
 
 clean-all:
-	  -rm -f sdl_mandel *.o
+	  -rm -f sdl_mandel *.o *.elf *.self *.pkg
