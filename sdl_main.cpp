@@ -12,33 +12,44 @@ SDL_Surface *InitSDL();
 
 int main(int argc, char *argv[])
 {
-  SDL_Surface *surface = InitSDL();
+	unsigned int r = 0xFF;
+	unsigned int g = 0x00;
+	unsigned int b = 0xFF;
+	unsigned long color = 0x00000000;
+	color += (unsigned long) (r << 16);
+	color += (unsigned long) (g << 8);
+	color += b;
+	printf("Color %lx\n", color);
 
-  Palette palette = Palette();
-  SDLPlotter plotter = SDLPlotter(surface, WIDTH, HEIGHT, palette);
-  Mandel mand = Mandel(ITERATIONS, WIDTH, HEIGHT, plotter);
+	SDL_Surface *surface = InitSDL();
 
-  mand.zoom(-3.0, 1.6, -1.3, 1.3);
-  char test;
-  cin >> test;
+	Palette palette = Palette();
+	SDLPlotter plotter = SDLPlotter(surface, WIDTH, HEIGHT, palette);
+	Mandel mand = Mandel(ITERATIONS, WIDTH, HEIGHT, plotter);
 
-  SDL_Quit();
+	mand.zoom(-3.0, 1.6, -1.3, 1.3);
+	char test;
+	cin >> test;
+
+	SDL_Quit();
 }
 
 SDL_Surface *InitSDL()
 {
-    // Initialise defaults, Video
-    if ((SDL_Init(SDL_Init(SDL_INIT_VIDEO))==-1)) {
-    cerr << "Could not initialise SDL: " << SDL_GetError() << ".\n";
-    exit(1);
-  }
-    // Initialise the display
-    // requesting a hardware surface
-    SDL_Surface *surface = SDL_SetVideoMode(WIDTH, HEIGHT, 32, SDL_HWSURFACE);
-    if ( surface == NULL ) {
-    cerr << "Couldn't set " << WIDTH << "x" << HEIGHT << "x32 video mode: "
-	 << SDL_GetError() << ".\n";
-    exit(1);
-  }
-    return surface;
+	// Initialise defaults, Video
+	if ((SDL_Init(SDL_Init(SDL_INIT_VIDEO))==-1)) {
+		cerr << "Could not initialise SDL: " << SDL_GetError() << ".\n";
+		exit(1);
+	}
+
+	// Initialise the display
+	// requesting a hardware surface
+	SDL_Surface *surface = SDL_SetVideoMode(WIDTH, HEIGHT, 32, SDL_HWSURFACE);
+	if ( surface == NULL ) {
+		cerr << "Couldn't set " << WIDTH << "x" << HEIGHT << "x32 video mode: "
+		 << SDL_GetError() << ".\n";
+		exit(1);
+	}
+
+	return surface;
 }

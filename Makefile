@@ -55,8 +55,8 @@ mandel.elf : ps3_main.o rsxutil.o
 ps3_main.o : ps3_main.cpp
 	$(PS3_CC) $(PS3_CFLAGS) -c ps3_main.cpp
 
-rsxutil.o : rsxutil.c
-	$(PS3_CC) $(PS3_CFLAGS) -c rsxutil.c
+rsxutil.o : rsxutil.cpp
+	$(PS3_CC) $(PS3_CFLAGS) -c rsxutil.cpp
 
 sdl_mandel : sdl_main.o mandel.o sdlplotter.o palette.o
 	$(CC) $(CPPFLAGS) -o sdl_mandel sdl_main.o mandel.o sdlplotter.o palette.o `sdl-config --libs`

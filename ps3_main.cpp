@@ -17,9 +17,9 @@
 #define MAX_BUFFERS 2
 
 void drawFrame(rsxBuffer*, long);
-void plot(rsxBuffer*, int, int, int, int, int);
+void plot(rsxBuffer*, int, int, u16, u16, u16);
 
-int main(s32 argc, const char* argv[])
+int main(int argc,const char *argv[])
 {
   gcmContextData *context;
   void *host_addr = NULL;
@@ -103,7 +103,7 @@ void drawFrame(rsxBuffer *buffer, long frame) {
   }
 }
 
-void plot(rsxBuffer *buffer, int x, int y, int r, int g, int b) {
+void plot(rsxBuffer *buffer, int x, int y, u16 r, u16 g, u16 b) {
 	u32 color = 0x00000000;
 	color += (u32) (r << 16);
 	color += (u32) (g << 8);
