@@ -61,6 +61,9 @@ rsxutil.o : rsxutil.cpp
 ps3_palette.o : palette.cpp
 	$(PS3_CC) $(PS3_CPPFLAGS) -o ps3_palette.o -c palette.cpp
 
+rsxplotter.o : rsxplotter.cpp
+	$(PS3_CC) $(PS3_CPPFLAGS) -c rsxplotter.cpp $(INCLUDE)
+
 sdl_mandel : sdl_main.o mandel.o sdlplotter.o palette.o
 	$(CC) $(CPPFLAGS) -o sdl_mandel sdl_main.o mandel.o sdlplotter.o palette.o `sdl-config --libs`
 
