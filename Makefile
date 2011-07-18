@@ -49,8 +49,8 @@ run:
 
 mandel.self : mandel.elf
 
-mandel.elf : ps3_main.o rsxutil.o ps3_palette.o
-	$(PS3_CC) $(PS3_CFLAGS) -o mandel.elf ps3_main.o rsxutil.o ps3_palette.o $(LIBS)
+mandel.elf : ps3_main.o rsxutil.o ps3_palette.o rsxplotter.o
+	$(PS3_CC) $(PS3_CFLAGS) -o mandel.elf ps3_main.o rsxutil.o ps3_palette.o rsxplotter.o $(LIBS)
 	
 ps3_main.o : ps3_main.cpp
 	$(PS3_CC) $(PS3_CFLAGS) -c ps3_main.cpp

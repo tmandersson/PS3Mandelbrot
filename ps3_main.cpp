@@ -15,6 +15,7 @@
 #include "rsxutil.h"
 
 #include "palette.h"
+#include "rsxplotter.h"
 
 #define MAX_BUFFERS 2
 
@@ -53,6 +54,7 @@ int main(int argc,const char *argv[])
   printf("First flip done.\n");
 
   Palette palette = Palette();
+  RSXPlotter plotter = RSXPlotter(&buffers[currentBuffer], palette);
   waitFlip(); // Wait for the last flip to finish, so we can draw to the old buffer
   drawFrame(&buffers[currentBuffer]); // Draw into the unused buffer
   flip(context, buffers[currentBuffer].id); // Flip buffer onto screen
