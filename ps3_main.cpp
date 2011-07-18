@@ -19,6 +19,8 @@
 
 #define MAX_BUFFERS 2
 
+const unsigned int ITERATIONS = 500;
+
 void drawFrame(rsxBuffer*);
 void plot(rsxBuffer*, int, int, u32);
 
@@ -55,9 +57,11 @@ int main(int argc,const char *argv[])
 
   Palette palette = Palette();
   RSXPlotter plotter = RSXPlotter(&buffers[currentBuffer], palette);
-  waitFlip(); // Wait for the last flip to finish, so we can draw to the old buffer
+  Mandel mand = Mandel(ITERATIONS, width, height, plotter);
+
+  waitFlip();
   drawFrame(&buffers[currentBuffer]); // Draw into the unused buffer
-  flip(context, buffers[currentBuffer].id); // Flip buffer onto screen
+  flip(context, buffers[currentBuffer].id);
 
   currentBuffer++;
   if (currentBuffer >= MAX_BUFFERS)
@@ -65,9 +69,7 @@ int main(int argc,const char *argv[])
 
   printf("Picture has been drawn.\n");
 	
-  // Ok, everything is setup. Now for the main loop.
   while(1){
-    // Check the pads.
     ioPadGetInfo(&padinfo);
     for(i=0; i<MAX_PADS; i++){
       if(padinfo.status[i]){

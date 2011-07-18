@@ -49,8 +49,8 @@ run:
 
 mandel.self : mandel.elf
 
-mandel.elf : ps3_main.o rsxutil.o ps3_palette.o rsxplotter.o
-	$(PS3_CC) $(PS3_CFLAGS) -o mandel.elf ps3_main.o rsxutil.o ps3_palette.o rsxplotter.o $(LIBS)
+mandel.elf : ps3_main.o rsxutil.o ps3_palette.o rsxplotter.o ps3_mandel.o
+	$(PS3_CC) $(PS3_CFLAGS) -o mandel.elf ps3_main.o rsxutil.o ps3_palette.o rsxplotter.o ps3_mandel.o $(LIBS)
 	
 ps3_main.o : ps3_main.cpp
 	$(PS3_CC) $(PS3_CFLAGS) -c ps3_main.cpp
@@ -63,6 +63,9 @@ ps3_palette.o : palette.cpp
 
 rsxplotter.o : rsxplotter.cpp
 	$(PS3_CC) $(PS3_CPPFLAGS) -c rsxplotter.cpp $(INCLUDE)
+
+ps3_mandel.o : mandel.cpp
+	$(PS3_CC) $(PS3_CPPFLAGS) -o ps3_mandel.o -c mandel.cpp
 
 sdl_mandel : sdl_main.o mandel.o sdlplotter.o palette.o
 	$(CC) $(CPPFLAGS) -o sdl_mandel sdl_main.o mandel.o sdlplotter.o palette.o `sdl-config --libs`
