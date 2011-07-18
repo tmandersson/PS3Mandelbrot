@@ -60,7 +60,7 @@ int main(int argc,const char *argv[])
   Mandel mand = Mandel(ITERATIONS, width, height, plotter);
 
   waitFlip();
-  drawFrame(&buffers[currentBuffer]); // Draw into the unused buffer
+  mand.zoom(-3.0, 1.6, -1.3, 1.3);
   flip(context, buffers[currentBuffer].id);
 
   currentBuffer++;
