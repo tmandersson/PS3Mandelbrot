@@ -14,9 +14,11 @@
 #include <io/pad.h>
 #include "rsxutil.h"
 
+#include "palette.h"
+
 #define MAX_BUFFERS 2
 
-void drawFrame(rsxBuffer*, long);
+void drawFrame(rsxBuffer*);
 void plot(rsxBuffer*, int, int, u32);
 
 int main(int argc,const char *argv[])
@@ -50,9 +52,9 @@ int main(int argc,const char *argv[])
 
   printf("First flip done.\n");
 
-  long frame = 0; // To keep track of how many frames we have rendered.
+  Palette palette = Palette();
   waitFlip(); // Wait for the last flip to finish, so we can draw to the old buffer
-  drawFrame(&buffers[currentBuffer], frame++); // Draw into the unused buffer
+  drawFrame(&buffers[currentBuffer]); // Draw into the unused buffer
   flip(context, buffers[currentBuffer].id); // Flip buffer onto screen
 
   currentBuffer++;
@@ -101,10 +103,10 @@ u32 GetARGB32(u16 r, u16 g, u16 b)
     return result;
 }
 
-void drawFrame(rsxBuffer *buffer, long frame) {
+void drawFrame(rsxBuffer *buffer) {
   s32 i, j;
   u32 color = GetARGB32(0xFF, 0x00, 0xFF);
-  printf("Chosen color: 0x%lx", (long unsigned int) color);
+  printf("Chosen color: 0x%lx\n", (long unsigned int) color);
   for(i = 0; i < buffer->height; i++) {
     for(j = 0; j < buffer->width; j++)
       plot(buffer, j, i, color);
