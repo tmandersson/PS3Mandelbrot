@@ -15,7 +15,7 @@ void RSXPlotter::plot(int x, int y, int color) {
 	putpixel(m_surface, x, y, argb);
 }
 
-u32 GetARGB32(u16 r, u16 g, u16 b)
+u32 GetARGB32(int r, int g, int b)
 {
     u32 result = 0x00000000;
     result += (u32)((r << 16));
