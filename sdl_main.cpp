@@ -12,15 +12,6 @@ SDL_Surface *InitSDL();
 
 int main(int argc, char *argv[])
 {
-	unsigned int r = 0xFF;
-	unsigned int g = 0x00;
-	unsigned int b = 0xFF;
-	unsigned long color = 0x00000000;
-	color += (unsigned long) (r << 16);
-	color += (unsigned long) (g << 8);
-	color += b;
-	printf("Color %lx\n", color);
-
 	SDL_Surface *surface = InitSDL();
 
 	Palette palette = Palette();
