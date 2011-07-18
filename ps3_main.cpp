@@ -17,7 +17,7 @@
 #define MAX_BUFFERS 2
 
 void drawFrame(rsxBuffer*, long);
-void plot(rsxBuffer*, int, int, u16, u16, u16);
+void plot(rsxBuffer*, int, int, u32);
 
 int main(int argc,const char *argv[])
 {
@@ -92,22 +92,25 @@ int main(int argc,const char *argv[])
   return 0;
 }
 
+u32 GetARGB32(u16 r, u16 g, u16 b)
+{
+    u32 result = 0x00000000;
+    result += (u32)((r << 16));
+    result += (u32)((g << 8));
+    result += b;
+    return result;
+}
+
 void drawFrame(rsxBuffer *buffer, long frame) {
   s32 i, j;
+  u32 color = GetARGB32(0xFF, 0x00, 0xFF);
+  printf("Chosen color: 0x%lx", (long unsigned int) color);
   for(i = 0; i < buffer->height; i++) {
-    s32 color = (i / (buffer->height * 1.0) * 256);
-    // This should make a nice black to green graident
-    color = (color << 8) | ((frame % 255) << 16);
     for(j = 0; j < buffer->width; j++)
-      plot(buffer, j, i, 0xFF, 0x00, 0xFF);
+      plot(buffer, j, i, color);
   }
 }
 
-void plot(rsxBuffer *buffer, int x, int y, u16 r, u16 g, u16 b) {
-	u32 color = 0x00000000;
-	color += (u32) (r << 16);
-	color += (u32) (g << 8);
-	color += b;
-	printf("Color %x32\n", color);
+void plot(rsxBuffer *buffer, int x, int y, u32 color) {
 	buffer->ptr[y * buffer->width + x] = color;
 }
