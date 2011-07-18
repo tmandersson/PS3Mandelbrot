@@ -19,7 +19,7 @@
 
 #define MAX_BUFFERS 2
 
-const unsigned int ITERATIONS = 500;
+const unsigned int ITERATIONS = 50;
 
 void drawFrame(rsxBuffer*);
 void plot(rsxBuffer*, int, int, u32);
