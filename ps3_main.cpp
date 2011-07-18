@@ -59,15 +59,16 @@ int main(int argc,const char *argv[])
   RSXPlotter plotter = RSXPlotter(&buffers[currentBuffer], palette);
   Mandel mand = Mandel(ITERATIONS, width, height, plotter);
 
+  // 1
   waitFlip();
   mand.zoom(-3.0, 1.6, -1.3, 1.3);
   flip(context, buffers[currentBuffer].id);
 
-  currentBuffer++;
-  if (currentBuffer >= MAX_BUFFERS)
-    currentBuffer = 0;
+  // 2
+  waitFlip();
+  mand.zoom(-2.0, 1.1, -0.9, 0.9);
 
-  printf("Picture has been drawn.\n");
+  printf("Pictures has been drawn.\n");
 	
   while(1){
     ioPadGetInfo(&padinfo);
