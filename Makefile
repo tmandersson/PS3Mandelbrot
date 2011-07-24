@@ -50,36 +50,36 @@ run:
 mandel.self : mandel.elf
 
 mandel.elf : ps3_main.o rsxutil.o ps3_palette.o rsxplotter.o ps3_mandel.o
-	$(PS3_CC) $(PS3_CFLAGS) -o mandel.elf ps3_main.o rsxutil.o ps3_palette.o rsxplotter.o ps3_mandel.o $(LIBS)
+	$(PS3_CC) $(PS3_CFLAGS) -o $@ $^ $(LIBS)
 	
 ps3_main.o : ps3_main.cpp
-	$(PS3_CC) $(PS3_CFLAGS) -c ps3_main.cpp
+	$(PS3_CC) $(PS3_CFLAGS) -c $^
 	
 rsxutil.o : rsxutil.cpp
-	$(PS3_CC) $(PS3_CFLAGS) -c rsxutil.cpp
+	$(PS3_CC) $(PS3_CFLAGS) -c $^
 
 ps3_palette.o : palette.cpp
-	$(PS3_CC) $(PS3_CPPFLAGS) -o ps3_palette.o -c palette.cpp
+	$(PS3_CC) $(PS3_CPPFLAGS) -o $@ -c $^
 
 rsxplotter.o : rsxplotter.cpp
-	$(PS3_CC) $(PS3_CPPFLAGS) -c rsxplotter.cpp $(INCLUDE)
+	$(PS3_CC) $(PS3_CPPFLAGS) -c $^ $(INCLUDE)
 
 ps3_mandel.o : mandel.cpp
-	$(PS3_CC) $(PS3_CPPFLAGS) -o ps3_mandel.o -c mandel.cpp
+	$(PS3_CC) $(PS3_CPPFLAGS) -o $@ -c $^
 
 sdl_mandel : sdl_main.o mandel.o sdlplotter.o palette.o
-	$(CC) $(CPPFLAGS) -o sdl_mandel sdl_main.o mandel.o sdlplotter.o palette.o `sdl-config --libs`
+	$(CC) $(CPPFLAGS) -o $@ $^ `sdl-config --libs`
 
 sdl_main.o : sdl_main.cpp
-	$(CC) $(CPPFLAGS) -c sdl_main.cpp 
+	$(CC) $(CPPFLAGS) -c $^ 
 mandel.o : mandel.cpp
-	 $(CC) $(CPPFLAGS) -c mandel.cpp
+	$(CC) $(CPPFLAGS) -c $^
 sdlplotter.o : sdlplotter.cpp
-	$(CC) $(CPPFLAGS) -c sdlplotter.cpp
+	$(CC) $(CPPFLAGS) -c $^
 palette.o : palette.cpp
-	$(CC) $(CPPFLAGS) -c palette.cpp
+	$(CC) $(CPPFLAGS) -c $^
 	   
 clean : clean-all
 
 clean-all:
-	  -rm -f sdl_mandel *.o *.elf *.self *.pkg
+	  -rm -f mandel sdl_mandel *.o *.elf *.self *.pkg
