@@ -31,14 +31,17 @@ LIBDIRS	:= $(PORTLIBS)
 #---------------------------------------------------------------------------------
 export INCLUDE	:=	$(foreach dir,$(INCLUDES), -I$(CURDIR)/$(dir)) \
 					$(foreach dir,$(LIBDIRS),-I$(dir)/include) \
-					$(LIBPSL1GHT_INC) \
-					-I$(CURDIR)/$(BUILD)
+					$(LIBPSL1GHT_INC) -I$(CURDIR)/include
 #-- END PS3/PSL1GHT stuff -----------------------------------------
 
 #-- C/C++ linux sdl stuff -----------------------------------------
 CC = g++
-CPPFLAGS = -Wall -O3
+CPPFLAGS = -Wall -O3 -I$(CURDIR)/include
 #-- End C/C++ linux sdl stuff -----------------------------------------
+
+vpath %.cpp src
+vpath %.c src
+vpath %.h include
 
 all : sdl_mandel ps3
 ps3 : mandel.self mandel.pkg
