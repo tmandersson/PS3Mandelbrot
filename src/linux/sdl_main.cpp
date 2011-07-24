@@ -1,5 +1,5 @@
-#include "mandel.h"
-#include "sdlplotter.h"
+#include "core/mandel.h"
+#include "linux/sdlplotter.h"
 #include <SDL/SDL.h>
 #include <iostream>
 using namespace std;

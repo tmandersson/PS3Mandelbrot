@@ -39,9 +39,9 @@ CC = g++
 CPPFLAGS = -Wall -O3 -I$(CURDIR)/include
 #-- End C/C++ linux sdl stuff -----------------------------------------
 
-vpath %.cpp src
-vpath %.c src
-vpath %.h include
+vpath %.cpp src src/core src/ps3 src/linux
+vpath %.c src src/core/ src/ps3 src/linux
+vpath %.h include include/core include/ps3 include/linux
 
 all : sdl_mandel ps3
 ps3 : mandel.self mandel.pkg

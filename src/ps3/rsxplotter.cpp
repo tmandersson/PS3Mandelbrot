@@ -1,5 +1,5 @@
 #include <iostream>
-#include "rsxplotter.h"
+#include "ps3/rsxplotter.h"
 
 u32 GetXRGB32(int, int, int);
 void putpixel(rsxBuffer *, int, int, u32);

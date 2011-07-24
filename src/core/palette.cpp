@@ -1,4 +1,4 @@
-#include "palette.h"
+#include "core/palette.h"
 
 Palette::Palette() {
 	CreatePalette();

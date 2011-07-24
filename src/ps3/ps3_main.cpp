@@ -12,10 +12,10 @@
 #include <rsx/rsx.h>
 
 #include <io/pad.h>
-#include "rsxutil.h"
+#include "ps3/rsxutil.h"
 
-#include "palette.h"
-#include "rsxplotter.h"
+#include "core/palette.h"
+#include "ps3/rsxplotter.h"
 
 #define MAX_BUFFERS 2
 

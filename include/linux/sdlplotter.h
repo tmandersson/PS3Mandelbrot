@@ -1,5 +1,5 @@
-#include "mandel.h"
-#include "palette.h"
+#include "core/mandel.h"
+#include "core/palette.h"
 #include <SDL/SDL.h>
 
 #ifndef SDLPLOTTER_H_

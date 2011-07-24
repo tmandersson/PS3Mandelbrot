@@ -1,5 +1,5 @@
 #include <iostream>
-#include "sdlplotter.h"
+#include "linux/sdlplotter.h"
 
 using std::cerr;
 

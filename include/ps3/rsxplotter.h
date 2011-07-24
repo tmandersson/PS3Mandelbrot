@@ -1,6 +1,6 @@
-#include "mandel.h"
-#include "palette.h"
-#include "rsxutil.h"
+#include "core/mandel.h"
+#include "core/palette.h"
+#include "ps3/rsxutil.h"
 
 #ifndef RSXPLOTTER_H_
 #define RSXPLOTTER_H_

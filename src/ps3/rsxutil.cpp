@@ -16,7 +16,7 @@
 #include <cairo/cairo.h>
 #include <math.h>
 
-#include "rsxutil.h"
+#include "ps3/rsxutil.h"
 
 #define GCM_LABEL_INDEX		255
 

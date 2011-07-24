@@ -1,5 +1,5 @@
 // mandel.cpp
-#include "mandel.h"
+#include "core/mandel.h"
 const double MinReal = -2.0;
 const double MaxReal = 0.6;
 const double MinImag = -1.3;
