@@ -52,7 +52,7 @@ mandel.self : mandel.elf
 mandel.elf : ps3_main.o rsxutil.o ps3_palette.o rsxplotter.o ps3_mandel.o
 	$(PS3_CC) $(PS3_CFLAGS) -o $@ $^ $(LIBS)
 	
-ps3_main.o : ps3_main.cpp
+ps3_main.o : ps3_main.cpp ps3_main.h
 	$(PS3_CC) $(PS3_CFLAGS) -o $@ -c $<
 	
 rsxutil.o : rsxutil.cpp rsxutil.h
@@ -70,7 +70,7 @@ ps3_mandel.o : mandel.cpp mandel.h
 sdl_mandel : sdl_main.o mandel.o sdlplotter.o palette.o
 	$(CC) $(CPPFLAGS) -o $@ $^ `sdl-config --libs`
 
-sdl_main.o : sdl_main.cpp
+sdl_main.o : sdl_main.cpp sdl_main.h
 	$(CC) $(CPPFLAGS) -c $<
 mandel.o : mandel.cpp mandel.h
 	$(CC) $(CPPFLAGS) -c $<
