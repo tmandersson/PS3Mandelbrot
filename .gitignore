@@ -1,4 +1,5 @@
 *.o
+*.pso
 mandel
 sdl_mandel
 *.elf

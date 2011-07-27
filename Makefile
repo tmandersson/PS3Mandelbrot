@@ -45,29 +45,14 @@ vpath %.h include include/core include/ps3 include/linux
 
 all : sdl_mandel ps3
 ps3 : mandel.self mandel.pkg
-
 run:
 	ps3load mandel.self
 
-
 mandel.self : mandel.elf
-
-mandel.elf : ps3_main.o rsxutil.o ps3_palette.o rsxplotter.o ps3_mandel.o
+mandel.elf : ps3_main.pso rsxutil.pso palette.pso rsxplotter.pso mandel.pso
+%.elf:
 	$(PS3_CC) $(PS3_CFLAGS) -o $@ $^ $(LIBS)
-	
-ps3_main.o : ps3_main.cpp ps3_main.h
-	$(PS3_CC) $(PS3_CFLAGS) -o $@ -c $<
-	
-rsxutil.o : rsxutil.cpp rsxutil.h
-	$(PS3_CC) $(PS3_CFLAGS) -o $@ -c $<
-
-ps3_palette.o : palette.cpp palette.h
-	$(PS3_CC) $(PS3_CFLAGS) -o $@ -c $<
-
-rsxplotter.o : rsxplotter.cpp rsxplotter.h
-	$(PS3_CC) $(PS3_CFLAGS) -o $@ -c $<
-
-ps3_mandel.o : mandel.cpp mandel.h
+%.pso: %.cpp %.h
 	$(PS3_CC) $(PS3_CFLAGS) -o $@ -c $<
 
 sdl_mandel : sdl_main.o mandel.o sdlplotter.o palette.o
@@ -83,6 +68,5 @@ palette.o : palette.cpp palette.h
 	$(CC) $(CPPFLAGS) -c $<
 	   
 clean : clean-all
-
 clean-all:
-	  -rm -f mandel sdl_mandel *.o *.elf *.self *.pkg
+	  -rm -f mandel sdl_mandel *.o *.pso *.elf *.self *.pkg
