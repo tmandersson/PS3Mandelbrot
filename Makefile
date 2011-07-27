@@ -43,30 +43,30 @@ vpath %.cpp src src/core src/ps3 src/linux
 vpath %.c src src/core/ src/ps3 src/linux
 vpath %.h include include/core include/ps3 include/linux
 
-all : sdl_mandel ps3
-ps3 : mandel.self mandel.pkg
+all: sdl_mandel ps3
+ps3: mandel.self mandel.pkg
 run:
 	ps3load mandel.self
 
-mandel.self : mandel.elf
-mandel.elf : ps3_main.pso rsxutil.pso palette.pso rsxplotter.pso mandel.pso
+mandel.self: mandel.elf
+mandel.elf: ps3_main.pso rsxutil.pso palette.pso rsxplotter.pso mandel.pso
 %.elf:
 	$(PS3_CC) $(PS3_CFLAGS) -o $@ $^ $(LIBS)
 %.pso: %.cpp %.h
 	$(PS3_CC) $(PS3_CFLAGS) -o $@ -c $<
 
-sdl_mandel : sdl_main.o mandel.o sdlplotter.o palette.o
+sdl_mandel: sdl_main.o mandel.o sdlplotter.o palette.o
 	$(CC) $(CPPFLAGS) -o $@ $^ `sdl-config --libs`
 
-sdl_main.o : sdl_main.cpp sdl_main.h
+sdl_main.o: sdl_main.cpp sdl_main.h
 	$(CC) $(CPPFLAGS) -c $<
-mandel.o : mandel.cpp mandel.h
+mandel.o: mandel.cpp mandel.h
 	$(CC) $(CPPFLAGS) -c $<
-sdlplotter.o : sdlplotter.cpp sdlplotter.h
+sdlplotter.o: sdlplotter.cpp sdlplotter.h
 	$(CC) $(CPPFLAGS) -c $<
-palette.o : palette.cpp palette.h
+palette.o: palette.cpp palette.h
 	$(CC) $(CPPFLAGS) -c $<
-	   
-clean : clean-all
+   
+clean: clean-all
 clean-all:
 	  -rm -f mandel sdl_mandel *.o *.pso *.elf *.self *.pkg
