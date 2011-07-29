@@ -55,18 +55,12 @@ mandel.elf: ps3_main.pso rsxutil.pso palette.pso rsxplotter.pso mandel.pso
 %.pso: %.cpp %.h
 	$(PS3_CC) $(PS3_CFLAGS) -o $@ -c $<
 
-sdl_mandel: sdl_main.o mandel.o sdlplotter.o palette.o
+sdl_mandel: sdl_main.lo mandel.lo sdlplotter.lo palette.lo
 	$(CC) $(CPPFLAGS) -o $@ $^ `sdl-config --libs`
 
-sdl_main.o: sdl_main.cpp sdl_main.h
-	$(CC) $(CPPFLAGS) -c $<
-mandel.o: mandel.cpp mandel.h
-	$(CC) $(CPPFLAGS) -c $<
-sdlplotter.o: sdlplotter.cpp sdlplotter.h
-	$(CC) $(CPPFLAGS) -c $<
-palette.o: palette.cpp palette.h
-	$(CC) $(CPPFLAGS) -c $<
-   
+%.lo: %.cpp %.h
+	$(CC) $(CPPFLAGS) -o $@ -c $<
+
 clean: clean-all
 clean-all:
-	  -rm -f mandel sdl_mandel *.o *.pso *.elf *.self *.pkg
+	  -rm -f mandel sdl_mandel *.o *.lo *.pso *.elf *.self *.pkg
