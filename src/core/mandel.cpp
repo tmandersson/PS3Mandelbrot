@@ -11,7 +11,7 @@ Mandel::Mandel(unsigned int iterations,
 	_have_painted = false; // haven't drawn the fractal yet
 }
 
-void Mandel::calculate()
+void Mandel::paint()
 {
 	int x, y;
 	complex pos(_min_re, _max_im);
@@ -21,7 +21,7 @@ void Mandel::calculate()
 
 	// color constant == (how many steps the color changes per iteration)
 	double color_constant = 256 / (double) _max_iterations; // shouldn't be done here
-	unsigned int c_iterations;
+	unsigned int iterations;
 	for (y = 0; y < _height; y++) {
 		if (y > 0)
 			pos -= complex(0, y_step);
@@ -32,8 +32,8 @@ void Mandel::calculate()
 				pos += x_step;
 
 			// plot the pixel if it doesn't belong to the Mandel set
-			if ( (c_iterations = iterate(pos)) )
-				_plotter.plot(x, y, (c_iterations * color_constant) < 1 ? 1: (int) (c_iterations * color_constant));
+			if ( (iterations = calculate(pos)) )
+				_plotter.plot(x, y, (iterations * color_constant) < 1 ? 1: (int) (iterations * color_constant));
 			else
 				_plotter.plot(x, y, 0);
 		}
@@ -53,7 +53,7 @@ void Mandel::zoom(double min_re, double max_re, double min_im, double max_im)
 		_max_im = max_im;
 
 		// paint the fractal
-		calculate();
+		paint();
 	}
 }
 
@@ -100,7 +100,7 @@ void Mandel::zoom_back()
 // we're calculating)
 // the second argument is the maximal number of iterations before we consider
 // C a part of the Mandel set.
-unsigned int Mandel::iterate(complex &c)
+unsigned int Mandel::calculate(complex &c)
 {
 	complex z(0,0);
 	unsigned iterations;

@@ -20,7 +20,7 @@ public:
 protected:
 	int _width, _height;
 	bool _have_painted; // Is set to True at start of plotting
-	void calculate(); // plot/calc the mandelbrot set
+	void paint(); // plot/calc the mandelbrot set
 	void zoom_cord(int, int, int, int);  // zoom to pixel cords
 
 private:
@@ -29,7 +29,7 @@ private:
 	double _min_re, _max_re, _min_im, _max_im;
 	unsigned int _max_iterations;
 
-	unsigned int iterate(complex &);
+	unsigned int calculate(complex &);
 };
 
 #endif /* MANDEL_H_ */
