@@ -19,8 +19,8 @@ void Mandel::calculate()
 	double x_step = (_max_re - _min_re) / _width;
 	double y_step = x_step;
 
-	// color constant (how many steps the color changes per iteration)
-	double colorconst = 256 / (double) _max_iterations; // shouldn't be done here
+	// color constant == (how many steps the color changes per iteration)
+	double color_constant = 256 / (double) _max_iterations; // shouldn't be done here
 	unsigned int c_iterations;
 	for (y = 0; y < _height; y++) {
 		if (y > 0)
@@ -33,7 +33,7 @@ void Mandel::calculate()
 
 			// plot the pixel if it doesn't belong to the Mandel set
 			if ( (c_iterations = iterate(pos)) )
-				_plotter.plot(x, y, (c_iterations * colorconst) < 1 ? 1: (int) (c_iterations * colorconst));
+				_plotter.plot(x, y, (c_iterations * color_constant) < 1 ? 1: (int) (c_iterations * color_constant));
 			else
 				_plotter.plot(x, y, 0);
 		}
