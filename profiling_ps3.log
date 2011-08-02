@@ -1,29 +1,20 @@
-READY
-ethdebug.bin: Initialized
-	Loading ethdebug.bin into lv2... Done! Result returned from ethdebug.bin in lv2: 0x0000000000000000
-This is a ttyWrite test, it will show up over UDP.
-Aaand we're done for tonight folks.
 PS3Load v0.3
 PS3Load Control thread
 Waiting for connection...
 exit_flag: 00
-Receiving data....(284302/990696)
+Receiving data....(284421/990696)
 Receiving arguments....(13)
 Launching...
-release_all(01,40000041)
+release_all(01,40000054)
 PS3Load Control thread exit
 Running Mandel video test!
 Resolution: 1920 x 1080
 Video init done.
 First flip done.
-Clock cycles elapsed: 18446743223036487179
-Time elapsed: 18446743223036488.00s
-Pixels calculated per second: 0.00
-Pixels calculated per clock: 0.00
-Clock cycles elapsed: 18446744073440012042
-Time elapsed: 18446744073440012.00s
-Pixels calculated per second: 0.00
-Pixels calculated per clock: 0.00
+Start time is: 1312315183 End time is: 1312315185
+Time elapsed: 2s
+Pixels calculated per second: 1036800.00
+Start time is: 1312315185 End time is: 1312315187
+Time elapsed: 2s
+Pixels calculated per second: 1036800.00
 Pictures has been drawn.
-Exiting!
-
