@@ -44,13 +44,13 @@ void Mandel::paint()
 	}
 
 	clock_t end = clock();
-	unsigned long cycles = (end - start);
-	double time = (double) (cycles / CLOCKS_PER_SEC);
-	unsigned long pixels = (_width * _height);
-	printf("Clockcycles elapsed: %lu\n", cycles);
-	printf("Time elapsed: %.2lfs\n", (double) time);
-    printf("Pixels calculated per second: %.2lf\n", (double) (pixels / time));
-    printf("Pixels calculated per clock: %.2lf\n", (double) (pixels / cycles));
+	long long unsigned int cycles = (end - start);
+	long double time = (long double) (cycles / CLOCKS_PER_SEC);
+	long unsigned pixels = (_width * _height);
+	printf("Clock cycles elapsed: %llu\n", cycles);
+	printf("Time elapsed: %.2Lfs\n", (long double) time);
+    printf("Pixels calculated per second: %.2Lf\n", (long double) (pixels / time));
+    printf("Pixels calculated per clock: %.2Lf\n", (long double) (pixels / cycles));
 }
 
 void Mandel::zoom(double min_re, double max_re, double min_im, double max_im)
