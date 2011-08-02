@@ -4,9 +4,9 @@
 #include <iostream>
 using namespace std;
 
-const int WIDTH = 1280;
-const int HEIGHT = 720;
-const unsigned int ITERATIONS = 500;
+const int WIDTH = 1920;
+const int HEIGHT = 1080;
+const unsigned int ITERATIONS = 50;
 
 SDL_Surface *InitSDL();
 

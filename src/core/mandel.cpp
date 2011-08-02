@@ -1,5 +1,7 @@
 // mandel.cpp
 #include "core/mandel.h"
+#include <stdio.h>
+#include <time.h>
 
 Mandel::Mandel(unsigned int iterations,
 		int width, int height, IPlotter &plotter) : _plotter(plotter)
@@ -13,6 +15,8 @@ Mandel::Mandel(unsigned int iterations,
 
 void Mandel::paint()
 {
+	clock_t start = clock();
+
 	int x, y;
 	complex pos(_min_re, _max_im);
 	_have_painted = true;
@@ -38,6 +42,11 @@ void Mandel::paint()
 				_plotter.plot(x, y, 0);
 		}
 	}
+
+	double time = (clock() - start) / CLOCKS_PER_SEC;
+	double pixels_per_second = (_width * _height) / time;
+    printf("Time elapsed: %f\n", time);
+    printf("Pixels calculated per second: %f\n", pixels_per_second);
 }
 
 void Mandel::zoom(double min_re, double max_re, double min_im, double max_im)
