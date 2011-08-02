@@ -1,104 +1,93 @@
 // mandel.cpp
 #include "core/mandel.h"
-const double MinReal = -2.0;
-const double MaxReal = 0.6;
-const double MinImag = -1.3;
-const double MaxImag = 1.3;
 
-Mandel::Mandel( unsigned int iterations,
-		int w, int h, IPlotter &plotter) : m_plotter(plotter)
+Mandel::Mandel(unsigned int iterations,
+		int width, int height, IPlotter &plotter) : _plotter(plotter)
 {
-  width = w;
-  height = h;
-  oldminre = minre = MinReal;
-  oldmaxre = maxre = MaxReal;
-  oldminim = minim = MinImag;
-  oldmaxim = maxim = MaxImag;
-  maxiter = iterations;
-
-  havepainted = false; // haven't drawn the fractal yet
+	_width = width;
+	_height = height;
+	_max_iterations = iterations;
+	_old_min_re = _old_max_re = _old_min_im = _old_max_im = 0;
+	_have_painted = false; // haven't drawn the fractal yet
 }
 
-void Mandel::calcmandel()
+void Mandel::calculate()
 {
-  int x, y;
-  complex pos(minre, maxim);
-  havepainted = true;
-  double xstep = (maxre - minre) / width;
-  double ystep = xstep;
-  // or ystep = (maxim - minim) / height if we allow the scales to be
-  // unproportional
+	int x, y;
+	complex pos(_min_re, _max_im);
+	_have_painted = true;
+	double x_step = (_max_re - _min_re) / _width;
+	double y_step = x_step;
 
-  // color constant (how many steps the color changes per iteration)
-  double colorconst = 256 / (double) maxiter; // shouldn't be done here
-  unsigned int c_iterations;
-  for (y = 0; y < height; y++)
-    {
-      if (y > 0)
-	pos -= complex(0, ystep);
+	// color constant (how many steps the color changes per iteration)
+	double colorconst = 256 / (double) _max_iterations; // shouldn't be done here
+	unsigned int c_iterations;
+	for (y = 0; y < _height; y++) {
+		if (y > 0)
+			pos -= complex(0, y_step);
 		  
-      pos = complex(minre, pos.imag()); // start with the first pixel on the row
-      for (x = 0; x < width; x++)
-	{
-	  if (x > 0)
-	    pos += xstep;
-			
-	  // plot the pixel if it doesn't belong to the Mandel set
-	  if ( (c_iterations = mandeliteration(pos, maxiter)) )	       
-	    m_plotter.plot(x, y, (c_iterations * colorconst) < 1
-		 ? 1: (int) (c_iterations * colorconst));
-	  else
-	    m_plotter.plot(x, y, 0);
+		pos = complex(_min_re, pos.imag()); // start with the first pixel on the row
+		for (x = 0; x < _width; x++) {
+			if (x > 0)
+				pos += x_step;
+
+			// plot the pixel if it doesn't belong to the Mandel set
+			if ( (c_iterations = iterate(pos)) )
+				_plotter.plot(x, y, (c_iterations * colorconst) < 1 ? 1: (int) (c_iterations * colorconst));
+			else
+				_plotter.plot(x, y, 0);
+		}
 	}
-    }
 }
 
-void Mandel::zoom(double minr, double maxr, double mini, double maxi)
+void Mandel::zoom(double min_re, double max_re, double min_im, double max_im)
 {
-  if (maxr > minr && maxi > mini) {
-    oldminre = minre; // save the old values, to be able too zoom back
-    oldmaxre = maxre;
-    oldminim = minim;
-    oldmaxim = maxim;
-    minre = minr;
-    maxre = maxr;
-    minim = mini;
-    maxim = maxi;
-      
-    // paint the fractal
-    calcmandel();
-  }
+	if (max_re > min_re && max_im > min_im) {
+		_old_min_re = _min_re; // save the old values, to be able too zoom back
+		_old_max_re = _max_re;
+		_old_min_im = _min_im;
+		_old_max_im = _max_im;
+		_min_re = min_re;
+		_max_re = max_re;
+		_min_im = min_im;
+		_max_im = max_im;
+
+		// paint the fractal
+		calculate();
+	}
 }
 
-void Mandel::zoom_cord(int fromx, int fromy, int tox, int toy)
+void Mandel::zoom_cord(int from_x, int from_y, int to_x, int to_y)
 {
-  double newminre, newmaxre, newminim, newmaxim;
-   
-  // calculate new view range
-  if (tox > fromx && toy > fromy) {
-    double xstep = (maxre - minre) / width;
-    double ystep = (maxim - minim) / height;
-     
-    newminre = minre + fromx * xstep;
-    newmaxre = maxre - (width - tox) * xstep;
-    newminim = minim + (height - (fromy + tox - fromx)) * ystep;
-    newmaxim = maxim - fromy * ystep;
+	double new_min_re, new_max_re, new_min_im, new_max_im;
 
-    // zoom with the new values
-    zoom(newminre, newmaxre, newminim, newmaxim);
-  }
+	// calculate new view range
+	if (to_x > from_x && to_y > from_y) {
+		double x_step = (_max_re - _min_re) / _width;
+		double y_step = (_max_im - _min_im) / _height;
+
+		new_min_re = _min_re + from_x * x_step;
+		new_max_re = _max_re - (_width - to_x) * x_step;
+		new_min_im = _min_im + (_height - (from_y + to_x - from_x)) * y_step;
+		new_max_im = _max_im - from_y * y_step;
+
+		// zoom with the new values
+		zoom(new_min_re, new_max_re, new_min_im, new_max_im);
+	}
 }
 
 void Mandel::zoom_back()
 {
-  if (oldminre != minre && oldmaxre != maxre) 
-    {
-      minre = oldminre;
-      maxre = oldmaxre;
-      minim = oldminim;
-      maxim = oldmaxim;
-      zoom(minre, maxre, minim, maxim);
-    }
+	if (_old_min_re == 0 && _old_max_re == 0 && _old_min_im == 0 && _old_max_im == 0)
+		return;
+
+	if (_old_min_re != _min_re && _old_max_re != _max_re) {
+		_min_re = _old_min_re;
+		_max_re = _old_max_re;
+		_min_im = _old_min_im;
+		_max_im = _old_max_im;
+		zoom(_min_re, _max_re, _min_im, _max_im);
+	}
 }
 
 // Iterate Zn+1 = Zn� + C till we now if the iterations is gonna reach infinity
@@ -111,28 +100,27 @@ void Mandel::zoom_back()
 // we're calculating)
 // the second argument is the maximal number of iterations before we consider
 // C a part of the Mandel set.
-unsigned int Mandel::mandeliteration(complex &c, unsigned int maxiterations)
+unsigned int Mandel::iterate(complex &c)
 {
-  complex z(0,0);
-  unsigned iterations;
-  bool infinity = false;
+	complex z(0,0);
+	unsigned iterations;
+	bool infinity = false;
 	
-  // Stop when we maximum number of iterations is reached (part of Mandel set)
-  // or when we're certain that the iteration is going to reach infinity.
-  for (iterations = 0; iterations < maxiterations && !infinity; iterations++)
-    {
-      z = z*z + c;
+	// Stop when we maximum number of iterations is reached (part of Mandel set)
+	// or when we're certain that the iteration is going to reach infinity.
+	for (iterations = 0; iterations < _max_iterations && !infinity; iterations++) {
+		z = z*z + c;
 
-      // We now that everything outside a circle with the radius of
-      // 2 is outside the Mandel set.		
-      // Thus if the abs(z) > 2 then the iterations is going to reach infinity
-      if ((z.real()*z.real() + z.imag()*z.imag()) > 4)
-	infinity = true;
-    }		
+		// We now that everything outside a circle with the radius of
+		// 2 is outside the Mandel set.
+		// Thus if the abs(z) > 2 then the iterations is going to reach infinity
+		if ((z.real()*z.real() + z.imag()*z.imag()) > 4)
+			infinity = true;
+	}
 	
-  // if the iteration don't reach infinity then C is part of the	Mandel set
-  if (!infinity)
-    return 0;
-  else
-    return iterations;
+	// if the iteration don't reach infinity then C is part of the	Mandel set
+	if (!infinity)
+		return 0;
+	else
+		return iterations;
 }
