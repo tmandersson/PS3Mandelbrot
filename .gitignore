@@ -12,3 +12,4 @@ ps3_build
 .project
 Debug
 TODO
+gmon.out
