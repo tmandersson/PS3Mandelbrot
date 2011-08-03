@@ -9,8 +9,13 @@ TITLE		:=	Mandelbrot plotter
 APPID		:=	MANDELBRO
 CONTENTID	:=	TMAnd0-$(APPID)_00-0000000000000000
 
-PS3_CC := $(CXX) 
-PS3_CFLAGS = -O2 -Wall -mcpu=cell $(MACHDEP) $(INCLUDE)
+PS3_CC := $(CXX)
+
+# override MACHDEPT from ppu_rules
+MACHDEP = 
+# and disable some optimizations to allow profiling
+PS3_CFLAGS = -O0 -Wall -mcpu=cell $(MACHDEP) $(INCLUDE)
+#PS3_CFLAGS = -O2 -Wall -mcpu=cell $(MACHDEP) $(INCLUDE)
 export LD	:=	$(CXX)
 LDFLAGS		=	$(MACHDEP) -Wl,-Map,$(notdir $@).map
 export BUILDDIR	:=	$(CURDIR)/ps3_build
@@ -51,9 +56,9 @@ run:
 mandel.self: mandel.elf
 mandel.elf: ps3_main.pso rsxutil.pso palette.pso rsxplotter.pso mandel.pso
 %.elf:
-	$(PS3_CC) $(PS3_CFLAGS) -o $@ $^ $(LIBS)
+	$(PS3_CC) $(PS3_CFLAGS) -o $@ $^ $(LIBS) -pg
 %.pso: %.cpp %.h
-	$(PS3_CC) $(PS3_CFLAGS) -o $@ -c $<
+	$(PS3_CC) $(PS3_CFLAGS) -o $@ -c $< -pg
 
 sdl_mandel: sdl_main.lo mandel.lo sdlplotter.lo palette.lo
 	$(CC) $(CPPFLAGS) -o $@ $^ `sdl-config --libs` -pg
