@@ -35,12 +35,13 @@ LIBDIRS	:= $(PORTLIBS)
 #---------------------------------------------------------------------------------
 export INCLUDE	:=	$(foreach dir,$(INCLUDES), -I$(CURDIR)/$(dir)) \
 					$(foreach dir,$(LIBDIRS),-I$(dir)/include) \
-					$(LIBPSL1GHT_INC) -I$(CURDIR)/include
+					$(LIBPSL1GHT_INC) -I$(CURDIR)/include \
+					-I$(PS3DEV)/ppu/lib/gcc/powerpc64-ps3-elf/4.5.2/include
 #-- END PS3/PSL1GHT stuff -----------------------------------------
 
 #-- C/C++ linux sdl stuff -----------------------------------------
 CC = g++
-CPPFLAGS = -Wall -O3 -I$(CURDIR)/include
+CPPFLAGS = -Wall -O3 -I$(CURDIR)/include $(INCLUDE)
 #-- End C/C++ linux sdl stuff -----------------------------------------
 
 vpath %.cpp src src/core src/ps3 src/linux

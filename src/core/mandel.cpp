@@ -2,6 +2,7 @@
 #include "core/mandel.h"
 #include <stdio.h>
 #include <time.h>
+#include "core/mftb_profiling.h"
 
 Mandel::Mandel(unsigned int iterations,
 		int width, int height, IPlotter &plotter) : _plotter(plotter)
