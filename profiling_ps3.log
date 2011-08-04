@@ -2,19 +2,25 @@ PS3Load v0.3
 PS3Load Control thread
 Waiting for connection...
 exit_flag: 00
-Receiving data....(284421/990696)
+Receiving data....(284465/990696)
 Receiving arguments....(13)
 Launching...
-release_all(01,40000054)
+release_all(01,40000098)
 PS3Load Control thread exit
 Running Mandel video test!
 Resolution: 1920 x 1080
 Video init done.
 First flip done.
-Start time is: 1312315183 End time is: 1312315185
-Time elapsed: 2s
-Pixels calculated per second: 1036800.00
-Start time is: 1312315185 End time is: 1312315187
-Time elapsed: 2s
-Pixels calculated per second: 1036800.00
+Start time is: 1312486882 End time is: 1312486883
+Time elapsed: 1s
+Pixels calculated per second: 2073600.00
+src/core/mandel.cpp:paint():#55 :: TB ticks:   103308102
+
+Start time is: 1312486883 End time is: 1312486886
+Time elapsed: 3s
+Pixels calculated per second: 691200.00
+src/core/mandel.cpp:paint():#55 :: TB ticks:   184940674
+
 Pictures has been drawn.
+Exiting!
+

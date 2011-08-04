@@ -16,7 +16,8 @@ Mandel::Mandel(unsigned int iterations,
 
 void Mandel::paint()
 {
-	time_t start = time(NULL);
+	mftbStart(start);
+	time_t time_start = time(NULL);
 
 	int x, y;
 	complex pos(_min_re, _max_im);
@@ -44,12 +45,14 @@ void Mandel::paint()
 		}
 	}
 
-	time_t end = time(NULL);
-	long unsigned time = difftime(end, start);;
+	time_t time_end = time(NULL);
+	long unsigned time = difftime(time_end, time_start);
 	long unsigned pixels = (_width * _height);
-	printf("Start time is: %lu End time is: %lu\n", start, end);
+	printf("Start time is: %lu End time is: %lu\n", time_start, time_end);
 	printf("Time elapsed: %lus\n", time);
     printf("Pixels calculated per second: %.2Lf\n", (long double) (pixels / time));
+
+    mftbStop(start,stop);
 }
 
 void Mandel::zoom(double min_re, double max_re, double min_im, double max_im)
