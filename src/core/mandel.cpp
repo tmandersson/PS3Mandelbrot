@@ -20,8 +20,8 @@ void Mandel::paint()
 	time_t time_start = time(NULL);
 
 	int x, y;
-	double pos_re = _min_re;
-	double pos_im = _max_im;
+	double re;
+	double im = _max_im;
 	_have_painted = true;
 	double x_step = (_max_re - _min_re) / _width;
 	double y_step = x_step;
@@ -31,11 +31,9 @@ void Mandel::paint()
 	unsigned int iterations;
 	for (y = 0; y < _height; y++) {
 		if (y > 0) {
-			pos_im -= y_step;
+			im -= y_step;
 		}
-		pos_re = _min_re;
-		double re = _min_re; // start with the first pixel on the row
-		double im = pos_im;
+		re = _min_re; // start with the first pixel on the row
 		for (x = 0; x < _width; x++) {
 			if (x > 0)
 				re += x_step;
