@@ -33,12 +33,14 @@ void Mandel::paint()
 			pos -= complex(0, y_step);
 		  
 		pos = complex(_min_re, pos.imag()); // start with the first pixel on the row
+		double re = _min_re;
+		double im = pos.imag();
 		for (x = 0; x < _width; x++) {
 			if (x > 0)
-				pos += x_step;
+				re += x_step;
 
 			// plot the pixel if it doesn't belong to the Mandel set
-			if ( (iterations = calculate(pos)) )
+			if ( (iterations = calculate(re, im)) )
 				_plotter.plot(x, y, (iterations * color_constant) < 1 ? 1: (int) (iterations * color_constant));
 			else
 				_plotter.plot(x, y, 0);
@@ -105,7 +107,7 @@ void Mandel::zoom_back()
 	}
 }
 
-// Iterate Zn+1 = Zn� + C till we now if the iterations is gonna reach infinity
+// Iterate Zn+1 = Zn^2 + C till we now if the iterations is gonna reach infinity
 // or not.
 // If we don't reach infinity then the function returns the number of 
 // iterations that were needed and the complex constant C belongs to the 
@@ -115,21 +117,27 @@ void Mandel::zoom_back()
 // we're calculating)
 // the second argument is the maximal number of iterations before we consider
 // C a part of the Mandel set.
-unsigned int Mandel::calculate(complex &c)
+unsigned int Mandel::calculate(double c_re, double c_im)
 {
-	complex z(0,0);
+	double z_re, z_im;
+	z_re = z_im = 0;
 	unsigned iterations;
 	bool infinity = false;
 	
 	// Stop when we maximum number of iterations is reached (part of Mandel set)
 	// or when we're certain that the iteration is going to reach infinity.
 	for (iterations = 0; iterations < _max_iterations && !infinity; iterations++) {
-		z = z*z + c;
+		// z = z*z + c;
+		double old_z_re, old_z_im;
+		old_z_re = z_re;
+		old_z_im = z_im;
+		z_re = ((old_z_re*old_z_re) - (old_z_im*old_z_im) + c_re);
+		z_im = ((old_z_re*old_z_im * 2) + c_im);
 
 		// We now that everything outside a circle with the radius of
 		// 2 is outside the Mandel set.
 		// Thus if the abs(z) > 2 then the iterations is going to reach infinity
-		if ((z.real()*z.real() + z.imag()*z.imag()) > 4)
+		if ((z_re*z_re + z_im*z_im) > 4)
 			infinity = true;
 	}
 	

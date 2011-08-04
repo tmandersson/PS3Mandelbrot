@@ -29,7 +29,7 @@ private:
 	double _min_re, _max_re, _min_im, _max_im;
 	unsigned int _max_iterations;
 
-	unsigned int calculate(complex &);
+	unsigned int calculate(double, double);
 };
 
 #endif /* MANDEL_H_ */
