@@ -20,7 +20,8 @@ void Mandel::paint()
 	time_t time_start = time(NULL);
 
 	int x, y;
-	complex pos(_min_re, _max_im);
+	double pos_re = _min_re;
+	double pos_im = _max_im;
 	_have_painted = true;
 	double x_step = (_max_re - _min_re) / _width;
 	double y_step = x_step;
@@ -29,12 +30,12 @@ void Mandel::paint()
 	double color_constant = 256 / (double) _max_iterations; // shouldn't be done here
 	unsigned int iterations;
 	for (y = 0; y < _height; y++) {
-		if (y > 0)
-			pos -= complex(0, y_step);
-		  
-		pos = complex(_min_re, pos.imag()); // start with the first pixel on the row
-		double re = _min_re;
-		double im = pos.imag();
+		if (y > 0) {
+			pos_im -= y_step;
+		}
+		pos_re = _min_re;
+		double re = _min_re; // start with the first pixel on the row
+		double im = pos_im;
 		for (x = 0; x < _width; x++) {
 			if (x > 0)
 				re += x_step;
@@ -52,7 +53,8 @@ void Mandel::paint()
 	long unsigned pixels = (_width * _height);
 	printf("Start time is: %lu End time is: %lu\n", time_start, time_end);
 	printf("Time elapsed: %lus\n", time);
-    printf("Pixels calculated per second: %.2Lf\n", (long double) (pixels / time));
+	if (time > 0)
+		printf("Pixels calculated per second: %.2Lf\n", (long double) (pixels / time));
 
     mftbStop(start,stop);
 }
@@ -128,11 +130,11 @@ unsigned int Mandel::calculate(double c_re, double c_im)
 	// or when we're certain that the iteration is going to reach infinity.
 	for (iterations = 0; iterations < _max_iterations && !infinity; iterations++) {
 		// z = z*z + c;
-		double old_z_re, old_z_im;
-		old_z_re = z_re;
-		old_z_im = z_im;
-		z_re = ((old_z_re*old_z_re) - (old_z_im*old_z_im) + c_re);
-		z_im = ((old_z_re*old_z_im * 2) + c_im);
+		double new_z_re, new_z_im;
+		new_z_re = ((z_re*z_re) - (z_im*z_im) + c_re);
+		new_z_im = ((z_re*z_im * 2) + c_im);
+		z_re = new_z_re;
+		z_im = new_z_im;
 
 		// We now that everything outside a circle with the radius of
 		// 2 is outside the Mandel set.
