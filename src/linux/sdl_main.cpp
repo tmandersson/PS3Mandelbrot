@@ -4,10 +4,11 @@
 #include <iostream>
 using namespace std;
 
-const int WIDTH = 1920;
-const int HEIGHT = 1080;
+const int WIDTH = 1280;
+const int HEIGHT = 720;
 const unsigned int ITERATIONS = 50;
 
+int kbhit();
 SDL_Surface *InitSDL();
 
 int main(int argc, char *argv[])
@@ -20,21 +21,24 @@ int main(int argc, char *argv[])
 
 
 	mand.zoom(-3.0, 1.6, -1.3, 1.3);
-	getchar();
-	mand.zoom_coord(192, 108, 1920-192, 1080-108);
-	getchar();
-	mand.zoom_coord(192, 108, 1920-192, 1080-108);
-	getchar();
-	mand.zoom_coord(192, 108, 1920-192, 1080-108);
-	getchar();
-	mand.zoom_coord(192, 108, 1920-192, 1080-108);
-	getchar();
-	mand.zoom_coord(192, 108, 1920-192, 1080-108);
+	mand.zoom_coord(WIDTH*0.1-23, HEIGHT*0.1+90, WIDTH-WIDTH*0.1-23, HEIGHT-HEIGHT*0.1+90);
 
-//	while(1) {
-//		mand.zoom_coord(192, 108, 1920-192, 1080-108);
-//	}
+	while(!kbhit()) {
+		mand.zoom_coord(WIDTH*0.01, HEIGHT*0.01, WIDTH-WIDTH*0.01, HEIGHT-HEIGHT*0.01);
+	}
 	SDL_Quit();
+}
+
+int kbhit()
+{
+	struct timeval tv;
+	fd_set fds;
+	tv.tv_sec = 0;
+	tv.tv_usec = 0;
+	FD_ZERO(&fds);
+	FD_SET(STDIN_FILENO, &fds); //STDIN_FILENO is 0
+	select(STDIN_FILENO+1, &fds, NULL, NULL, &tv);
+	return FD_ISSET(STDIN_FILENO, &fds);
 }
 
 SDL_Surface *InitSDL()
