@@ -9,8 +9,9 @@ class RSXPlotter : public IPlotter {
  public:
 	RSXPlotter(rsxBuffer *surface, Palette &palette);
 	void plot(int x, int y, int color);
+	void setSurface(rsxBuffer *surface);
  private:
-	rsxBuffer *m_surface;
+	rsxBuffer *_surface;
 	Palette &_palette;
 };
 

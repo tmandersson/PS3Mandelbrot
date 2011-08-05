@@ -29,7 +29,7 @@ int main(int argc,const char *argv[])
 	gcmContextData *context;
 	void *host_addr = NULL;
 	rsxBuffer buffers[MAX_BUFFERS];
-	int currentBuffer = 0;
+	int current_buffer = 0;
 	padInfo padinfo;
 	padData paddata;
 	u16 width;
@@ -56,18 +56,24 @@ int main(int argc,const char *argv[])
 	printf("First flip done.\n");
 
 	Palette palette = Palette();
-	RSXPlotter plotter = RSXPlotter(&buffers[currentBuffer], palette);
+	RSXPlotter plotter = RSXPlotter(&buffers[current_buffer], palette);
 	Mandel mand = Mandel(ITERATIONS, width, height, plotter);
 
 	// 1
 	waitFlip();
 	mand.zoom(-3.0, 1.6, -1.3, 1.3);
-	flip(context, buffers[currentBuffer].id);
+	flip(context, buffers[current_buffer].id);
+	if (current_buffer < MAX_BUFFERS)
+		current_buffer++;
+	else
+		current_buffer = 0;
+	plotter.setSurface(&buffers[current_buffer]);
 
 	// 2
 	waitFlip();
 	mand.zoom(-2.0, 1.1, -0.9, 0.9);
-	
+	flip(context, buffers[current_buffer].id);
+
 	printf("Pictures has been drawn.\n");
 	
 	while(1) {
