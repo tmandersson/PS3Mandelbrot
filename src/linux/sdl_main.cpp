@@ -21,6 +21,15 @@ int main(int argc, char *argv[])
 
 	mand.zoom(-3.0, 1.6, -1.3, 1.3);
 	getchar();
+	mand.zoom_coord(192, 108, 1920-192, 1080-108);
+	getchar();
+	mand.zoom_coord(192, 108, 1920-192, 1080-108);
+	getchar();
+	mand.zoom_coord(192, 108, 1920-192, 1080-108);
+	getchar();
+	mand.zoom_coord(192, 108, 1920-192, 1080-108);
+	getchar();
+	mand.zoom_coord(192, 108, 1920-192, 1080-108);
 
 //	while(1) {
 //		mand.zoom_coord(192, 108, 1920-192, 1080-108);

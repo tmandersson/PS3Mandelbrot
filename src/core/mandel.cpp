@@ -85,8 +85,10 @@ void Mandel::zoom_coord(int from_x, int from_y, int to_x, int to_y)
 
 		new_min_re = _min_re + from_x * x_step;
 		new_max_re = _max_re - (_width - to_x) * x_step;
-		new_min_im = _min_im + (_height - (from_y + to_x - from_x)) * y_step;
-		new_max_im = _max_im - from_y * y_step;
+		new_min_im = _min_im + from_y * y_step;
+		new_max_im = _max_im - (_height - to_y) * y_step;
+		// new_min_im = _min_im + (_height - (from_y + to_x - from_x)) * y_step;
+		// new_max_im = _max_im - from_y * y_step;
 
 		// zoom with the new values
 		zoom(new_min_re, new_max_re, new_min_im, new_max_im);
