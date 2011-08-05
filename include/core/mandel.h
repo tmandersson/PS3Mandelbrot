@@ -12,13 +12,13 @@ public:
 	virtual ~Mandel() { }
 
 	void zoom(double, double, double, double);
+	void zoom_coord(int, int, int, int);  // zoom to pixel cords
 	void zoom_back(); // zoom back one step
    
 protected:
 	int _width, _height;
 	bool _have_painted; // Is set to True at start of plotting
 	void paint(); // plot/calc the mandelbrot set
-	void zoom_cord(int, int, int, int);  // zoom to pixel cords
 
 private:
 	IPlotter &_plotter;

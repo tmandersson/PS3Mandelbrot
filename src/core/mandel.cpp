@@ -21,17 +21,17 @@ void Mandel::paint()
 
 	int x, y;
 	double re;
-	double im = _max_im;
+	double im = _min_im;
 	_have_painted = true;
 	double x_step = (_max_re - _min_re) / _width;
-	double y_step = x_step;
+	double y_step = (_max_im - _min_im) / _height;
 
 	// color constant == (how many steps the color changes per iteration)
 	double color_constant = 256 / (double) _max_iterations; // shouldn't be done here
 	unsigned int iterations;
 	for (y = 0; y < _height; y++) {
 		if (y > 0) {
-			im -= y_step;
+			im += y_step;
 		}
 		re = _min_re; // start with the first pixel on the row
 		for (x = 0; x < _width; x++) {
@@ -74,7 +74,7 @@ void Mandel::zoom(double min_re, double max_re, double min_im, double max_im)
 	}
 }
 
-void Mandel::zoom_cord(int from_x, int from_y, int to_x, int to_y)
+void Mandel::zoom_coord(int from_x, int from_y, int to_x, int to_y)
 {
 	double new_min_re, new_max_re, new_min_im, new_max_im;
 

@@ -18,10 +18,13 @@ int main(int argc, char *argv[])
 	SDLPlotter plotter = SDLPlotter(surface, WIDTH, HEIGHT, palette);
 	Mandel mand = Mandel(ITERATIONS, WIDTH, HEIGHT, plotter);
 
-	mand.zoom(-3.0, 1.6, -1.3, 1.3);
-	char test;
-	cin >> test;
 
+	mand.zoom(-3.0, 1.6, -1.3, 1.3);
+	getchar();
+
+//	while(1) {
+//		mand.zoom_coord(192, 108, 1920-192, 1080-108);
+//	}
 	SDL_Quit();
 }
 
