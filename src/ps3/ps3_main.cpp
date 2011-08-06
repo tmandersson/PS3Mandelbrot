@@ -53,30 +53,28 @@ int main(int argc,const char *argv[])
 
 	flip(context, MAX_BUFFERS - 1);
 
-	printf("First flip done.\n");
-
 	Palette palette = Palette();
 	RSXPlotter plotter = RSXPlotter(&buffers[current_buffer], palette);
 	Mandel mand = Mandel(ITERATIONS, width, height, plotter);
 
-	// 1
 	waitFlip();
-	mand.zoom(-3.0, 1.6, -1.3, 1.3);
-	flip(context, buffers[current_buffer].id);
-	if (current_buffer < MAX_BUFFERS)
-		current_buffer++;
-	else
-		current_buffer = 0;
-	plotter.setSurface(&buffers[current_buffer]);
-
-	// 2
-	waitFlip();
-	mand.zoom(-2.0, 1.1, -0.9, 0.9);
+	mand.zoom(-2.625531-(0.002875*0), 1.054469-(0.002875*0), -0.715000-(0.002888889*0), 1.365000-(0.002888889*0));
 	flip(context, buffers[current_buffer].id);
 
-	printf("Pictures has been drawn.\n");
-	
 	while(1) {
+		// Change to other buffer.
+		if (current_buffer < (MAX_BUFFERS - 1))
+			current_buffer++;
+		else
+			current_buffer = 0;
+		plotter.setSurface(&buffers[current_buffer]);
+
+		// zoom and draw
+		waitFlip();
+		mand.zoom_coord(width*0.01, height*0.01, width-width*0.01, height-height*0.01);
+		flip(context, buffers[current_buffer].id);
+
+		// check for user input for exit
 		ioPadGetInfo(&padinfo);
 		for(i=0; i<MAX_PADS; i++) {
 			if(padinfo.status[i]) {
