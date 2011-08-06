@@ -92,6 +92,7 @@ void Mandel::zoom_coord(int from_x, int from_y, int to_x, int to_y)
 
 		// zoom with the new values
 		zoom(new_min_re, new_max_re, new_min_im, new_max_im);
+		printf("New values: %f %f %f %f (minr, maxr, mini, maxi)", new_min_re, new_max_re, new_min_im, new_max_im);
 	}
 }
 

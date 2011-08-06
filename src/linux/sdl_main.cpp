@@ -4,8 +4,8 @@
 #include <iostream>
 using namespace std;
 
-const int WIDTH = 1280;
-const int HEIGHT = 720;
+const int WIDTH = 1920;
+const int HEIGHT = 1080;
 const unsigned int ITERATIONS = 50;
 
 int kbhit();
@@ -19,9 +19,7 @@ int main(int argc, char *argv[])
 	SDLPlotter plotter = SDLPlotter(surface, WIDTH, HEIGHT, palette);
 	Mandel mand = Mandel(ITERATIONS, WIDTH, HEIGHT, plotter);
 
-
-	mand.zoom(-3.0, 1.6, -1.3, 1.3);
-	mand.zoom_coord(WIDTH*0.1-23, HEIGHT*0.1+90, WIDTH-WIDTH*0.1-23, HEIGHT-HEIGHT*0.1+90);
+	mand.zoom(-2.625531-(0.002875*0), 1.054469-(0.002875*0), -0.715000-(0.002888889*0), 1.365000-(0.002888889*0));
 
 	while(!kbhit()) {
 		mand.zoom_coord(WIDTH*0.01, HEIGHT*0.01, WIDTH-WIDTH*0.01, HEIGHT-HEIGHT*0.01);
