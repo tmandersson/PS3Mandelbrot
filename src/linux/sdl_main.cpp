@@ -18,14 +18,15 @@ int main(int argc, char *argv[])
 	SDLPlotter plotter = SDLPlotter(surface, WIDTH, HEIGHT, palette);
 	Mandel mand = Mandel(WIDTH, HEIGHT, plotter);
 
-	double start_real = -1.6702655;
-	double start_imag = 1.2097345;
-	double offset_real = 0.9552655;
-	double offset_imag = 0.1552655;
-	mand.zoom(start_real-offset_real, start_imag-offset_imag, start_real+offset_real, start_imag+offset_imag);
+	// -0.743643887037158704752191506114774, 0.131825904205311970493132056385139
+	double start_real = -0.743643887037158704752191506114774;
+	double start_imag = 0.131825904205311970493132056385139;
+	double offset_real = 1.6;
+	double offset_imag = 0.9;
+	mand.zoom(start_real-offset_real, start_real+offset_real, start_imag-offset_imag, start_imag+offset_imag);
 
 	while(!kbhit()) {
-		mand.zoom_coord(WIDTH*0.01, HEIGHT*0.01, WIDTH-WIDTH*0.01, HEIGHT-HEIGHT*0.01);
+		mand.zoom_coord(16, 9, WIDTH-16, HEIGHT-9);
 	}
 	SDL_Quit();
 }
