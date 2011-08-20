@@ -8,7 +8,7 @@ public:
 
 class Mandel {
 public:
-	Mandel(unsigned int, int, int, IPlotter &);
+	Mandel(int, int, IPlotter &);
 	virtual ~Mandel() { }
 
 	void zoom(double, double, double, double);

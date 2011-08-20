@@ -6,7 +6,6 @@ using namespace std;
 
 const int WIDTH = 1920;
 const int HEIGHT = 1080;
-const unsigned int ITERATIONS = 50;
 
 int kbhit();
 SDL_Surface *InitSDL();
@@ -17,7 +16,7 @@ int main(int argc, char *argv[])
 
 	Palette palette = Palette();
 	SDLPlotter plotter = SDLPlotter(surface, WIDTH, HEIGHT, palette);
-	Mandel mand = Mandel(ITERATIONS, WIDTH, HEIGHT, plotter);
+	Mandel mand = Mandel(WIDTH, HEIGHT, plotter);
 
 	mand.zoom(-2.625531-(0.002875*0), 1.054469-(0.002875*0), -0.715000-(0.002888889*0), 1.365000-(0.002888889*0));
 

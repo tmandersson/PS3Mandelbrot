@@ -4,12 +4,13 @@
 #include <time.h>
 #include "core/mftb_profiling.h"
 
-Mandel::Mandel(unsigned int iterations,
-		int width, int height, IPlotter &plotter) : _plotter(plotter)
+const unsigned int ITERATIONS = 256;
+
+Mandel::Mandel(int width, int height, IPlotter &plotter) : _plotter(plotter)
 {
 	_width = width;
 	_height = height;
-	_max_iterations = iterations;
+	_max_iterations = ITERATIONS;
 	_old_min_re = _old_max_re = _old_min_im = _old_max_im = 0;
 	_have_painted = false; // haven't drawn the fractal yet
 }
@@ -26,8 +27,6 @@ void Mandel::paint()
 	double x_step = (_max_re - _min_re) / _width;
 	double y_step = (_max_im - _min_im) / _height;
 
-	// color constant == (how many steps the color changes per iteration)
-	double color_constant = 256 / (double) _max_iterations; // shouldn't be done here
 	unsigned int iterations;
 	for (y = 0; y < _height; y++) {
 		if (y > 0) {
@@ -40,7 +39,7 @@ void Mandel::paint()
 
 			// plot the pixel if it doesn't belong to the Mandel set
 			if ( (iterations = calculate(re, im)) )
-				_plotter.plot(x, y, (iterations * color_constant) < 1 ? 1: (int) (iterations * color_constant));
+				_plotter.plot(x, y, (iterations % 255) + 1);
 			else
 				_plotter.plot(x, y, 0);
 		}
