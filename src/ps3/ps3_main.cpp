@@ -53,7 +53,16 @@ int main(int argc,const char *argv[])
 	Mandel mand = Mandel(width, height, plotter);
 
 	waitFlip();
-	mand.zoom(-2.625531-(0.002875*0), 1.054469-(0.002875*0), -0.715000-(0.002888889*0), 1.365000-(0.002888889*0));
+
+	// -0.743643887037158704752191506114774, 0.131825904205311970493132056385139
+	double start_real = -0.743643887037158704752191506114774;
+	double start_imag = 0.131825904205311970493132056385139;
+	double x_aspect = 16;
+	double y_aspect = 9;
+	double offset_real = x_aspect * 0.1;
+	double offset_imag = y_aspect * 0.1;
+	mand.zoom(start_real-offset_real, start_real+offset_real, start_imag-offset_imag, start_imag+offset_imag);
+
 	flip(context, buffers[current_buffer].id);
 
 	while(1) {
@@ -66,7 +75,7 @@ int main(int argc,const char *argv[])
 
 		// zoom and draw
 		waitFlip();
-		mand.zoom_coord(width*0.01, height*0.01, width-width*0.01, height-height*0.01);
+		mand.zoom_coord(x_aspect, y_aspect, width-x_aspect, height-y_aspect);
 		flip(context, buffers[current_buffer].id);
 
 		// check for user input for exit

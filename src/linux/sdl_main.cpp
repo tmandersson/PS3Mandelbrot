@@ -21,12 +21,14 @@ int main(int argc, char *argv[])
 	// -0.743643887037158704752191506114774, 0.131825904205311970493132056385139
 	double start_real = -0.743643887037158704752191506114774;
 	double start_imag = 0.131825904205311970493132056385139;
-	double offset_real = 1.6;
-	double offset_imag = 0.9;
+	double x_aspect = 16;
+	double y_aspect = 9;
+	double offset_real = x_aspect * 0.1;
+	double offset_imag = y_aspect * 0.1;
 	mand.zoom(start_real-offset_real, start_real+offset_real, start_imag-offset_imag, start_imag+offset_imag);
 
 	while(!kbhit()) {
-		mand.zoom_coord(16, 9, WIDTH-16, HEIGHT-9);
+		mand.zoom_coord(x_aspect, y_aspect, WIDTH-x_aspect, HEIGHT-y_aspect);
 	}
 	SDL_Quit();
 }
