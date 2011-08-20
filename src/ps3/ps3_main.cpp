@@ -21,9 +21,6 @@
 
 const unsigned int ITERATIONS = 50;
 
-void drawFrame(rsxBuffer*);
-void plot(rsxBuffer*, int, int, u32);
-
 int main(int argc,const char *argv[])
 {
 	gcmContextData *context;
@@ -101,25 +98,3 @@ int main(int argc,const char *argv[])
 	return 0;
 }
 
-u32 GetARGB32(int r, int g, int b)
-{
-	u32 result = 0x00000000;
-	result += (u32)((r << 16));
-	result += (u32)((g << 8));
-	result += b;
-	return result;
-}
-
-void drawFrame(rsxBuffer *buffer) {
-	s32 i, j;
-	u32 color = GetARGB32(0xFF, 0x00, 0xFF);
-	printf("Chosen color: 0x%lx\n", (long unsigned int) color);
-	for(i = 0; i < buffer->height; i++) {
-		for(j = 0; j < buffer->width; j++)
-		  plot(buffer, j, i, color);
-	}
-}
-
-void plot(rsxBuffer *buffer, int x, int y, u32 color) {
-	buffer->ptr[y * buffer->width + x] = color;
-}
