@@ -14,6 +14,18 @@ Mandel::Mandel(int width, int height, IPlotter &plotter) : _plotter(plotter)
 	_max_iterations = ITERATIONS;
 	_old_min_re = _old_max_re = _old_min_im = _old_max_im = 0;
 	_have_painted = false; // haven't drawn the fractal yet
+
+	_results = (unsigned int*) calloc(_width*_height, sizeof(unsigned int));
+	if (!_results)
+	{
+		printf("Memory allocation failed!\n");
+		exit(1);
+	}
+}
+
+Mandel::~Mandel()
+{
+	free(_results);
 }
 
 void Mandel::paint()
@@ -28,31 +40,24 @@ void Mandel::paint()
 	double x_step = (_max_re - _min_re) / _width;
 	double y_step = (_max_im - _min_im) / _height;
 
-	unsigned int *results = (unsigned int*) calloc(_width*_height, sizeof(unsigned int));
-	if (!results)
-	{
-		printf("Memory allocation failed!\n");
-		exit(1);
-	}
 	for (y = 0; y < _height; y++) {
 		if (y > 0) {
 			im -= y_step;
 		}
 		re = _min_re; // start with the first pixel on the row
-		calculate_row(re, im, x_step, &results[y*_width]);
+		calculate_row(re, im, x_step, &_results[y*_width]);
 	}
 
 	for (y = 0; y < _height; y++) {
 		for (x = 0; x < _width; x++) {
 			// plot the pixel with colour if it doesn't belong to the Mandel set
-			unsigned int iterations = results[y*_width + x];
+			unsigned int iterations = _results[y*_width + x];
 			if ( iterations != 0)
 				_plotter.plot(x, y, (iterations % 255) + 1);
 			else
 				_plotter.plot(x, y, 0);
 		}
 	}
-	free(results);
 
 	time_t time_end = time(NULL);
 	long unsigned time = difftime(time_end, time_start);

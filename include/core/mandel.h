@@ -9,7 +9,7 @@ public:
 class Mandel {
 public:
 	Mandel(int, int, IPlotter &);
-	virtual ~Mandel() { }
+	virtual ~Mandel();
 
 	void zoom(double, double, double, double);
 	void zoom_coord(int, int, int, int);  // zoom to pixel cords
@@ -26,6 +26,7 @@ private:
 	double _min_re, _max_re, _min_im, _max_im;
 	unsigned int _max_iterations;
 
+	unsigned int *_results;
 	void calculate_row(double, double, double, unsigned int *);
 	unsigned int calculate(double, double);
 };
