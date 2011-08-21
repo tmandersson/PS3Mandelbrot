@@ -33,13 +33,7 @@ void Mandel::paint()
 			im -= y_step;
 		}
 		re = _min_re; // start with the first pixel on the row
-		for (x = 0; x < _width; x++) {
-			if (x > 0)
-				re += x_step;
-
-			// save number of iterations
-			results[y][x] = calculate(re, im);
-		}
+		calculate_row(re, im, x_step, &results[y][0]);
 	}
 
 	for (y = 0; y < _height; y++) {
@@ -114,6 +108,17 @@ void Mandel::zoom_back()
 		_min_im = _old_min_im;
 		_max_im = _old_max_im;
 		zoom(_min_re, _max_re, _min_im, _max_im);
+	}
+}
+
+void Mandel::calculate_row(double re, double im, double x_step, unsigned int *results) {
+	int x;
+	for (x = 0; x < _width; x++) {
+		if (x > 0)
+			re += x_step;
+
+		// save number of iterations
+		results[x] = calculate(re, im);
 	}
 }
 

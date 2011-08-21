@@ -26,6 +26,7 @@ private:
 	double _min_re, _max_re, _min_im, _max_im;
 	unsigned int _max_iterations;
 
+	void calculate_row(double, double, double, unsigned int *);
 	unsigned int calculate(double, double);
 };
 
