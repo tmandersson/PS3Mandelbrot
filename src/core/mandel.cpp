@@ -27,7 +27,7 @@ void Mandel::paint()
 	double x_step = (_max_re - _min_re) / _width;
 	double y_step = (_max_im - _min_im) / _height;
 
-	unsigned int iterations;
+	unsigned int results[_height][_width];
 	for (y = 0; y < _height; y++) {
 		if (y > 0) {
 			im -= y_step;
@@ -37,8 +37,16 @@ void Mandel::paint()
 			if (x > 0)
 				re += x_step;
 
-			// plot the pixel if it doesn't belong to the Mandel set
-			if ( (iterations = calculate(re, im)) )
+			// save number of iterations
+			results[y][x] = calculate(re, im);
+		}
+	}
+
+	for (y = 0; y < _height; y++) {
+		for (x = 0; x < _width; x++) {
+			// plot the pixel with colour if it doesn't belong to the Mandel set
+			unsigned int iterations = results[y][x];
+			if ( iterations != 0)
 				_plotter.plot(x, y, (iterations % 255) + 1);
 			else
 				_plotter.plot(x, y, 0);
