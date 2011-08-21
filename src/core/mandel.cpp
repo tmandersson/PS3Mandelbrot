@@ -40,12 +40,23 @@ void Mandel::paint()
 	double x_step = (_max_re - _min_re) / _width;
 	double y_step = (_max_im - _min_im) / _height;
 
-	for (y = 0; y < _height; y++) {
-		if (y > 0) {
-			im -= y_step;
+	int sections = 4;
+
+	int section_limit;
+	int old_section_limit;
+	section_limit = 0;
+
+	for (int current_section = 1; current_section <= sections; current_section++)
+	{
+		old_section_limit = section_limit;
+		section_limit = (_height/sections)*current_section;
+		for (y = old_section_limit; y < section_limit; y++) {
+			if (y > 0) {
+				im -= y_step;
+			}
+			re = _min_re; // start with the first pixel on the row
+			calculate_row(re, im, x_step, &_results[y*_width]);
 		}
-		re = _min_re; // start with the first pixel on the row
-		calculate_row(re, im, x_step, &_results[y*_width]);
 	}
 
 	for (y = 0; y < _height; y++) {
