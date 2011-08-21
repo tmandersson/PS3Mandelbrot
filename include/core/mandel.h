@@ -26,9 +26,10 @@ private:
 	double _min_re, _max_re, _min_im, _max_im;
 	unsigned int _max_iterations;
 
+	double _x_step, _y_step;
 	unsigned int *_results;
-	void calculate_section(int, int, double, double, double);
-	void calculate_row(double, double, double, unsigned int *);
+	void calculate_section(int, int, double);
+	void calculate_row(double, double, unsigned int *);
 	unsigned int calculate(double, double);
 };
 

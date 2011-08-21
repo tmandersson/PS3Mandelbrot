@@ -36,8 +36,8 @@ void Mandel::paint()
 	int x, y;
 	double im = _max_im;
 	_have_painted = true;
-	double x_step = (_max_re - _min_re) / _width;
-	double y_step = (_max_im - _min_im) / _height;
+	_x_step = (_max_re - _min_re) / _width;
+	_y_step = (_max_im - _min_im) / _height;
 
 	int sections = 4;
 
@@ -52,8 +52,8 @@ void Mandel::paint()
 		double start, end;
 		start = old_section_limit;
 		end = section_limit;
-		im = _max_im - (old_section_limit * y_step);
-		calculate_section(start, end, x_step, y_step, im);
+		im = _max_im - (old_section_limit * _y_step);
+		calculate_section(start, end, im);
 	}
 
 	for (y = 0; y < _height; y++) {
@@ -101,15 +101,15 @@ void Mandel::zoom_coord(int from_x, int from_y, int to_x, int to_y)
 
 	// calculate new view range
 	if (to_x > from_x && to_y > from_y) {
-		double x_step = (_max_re - _min_re) / _width;
-		double y_step = (_max_im - _min_im) / _height;
+		double _x_step = (_max_re - _min_re) / _width;
+		double _y_step = (_max_im - _min_im) / _height;
 
-		new_min_re = _min_re + from_x * x_step;
-		new_max_re = _max_re - (_width - to_x) * x_step;
-		new_min_im = _min_im + from_y * y_step;
-		new_max_im = _max_im - (_height - to_y) * y_step;
-		// new_min_im = _min_im + (_height - (from_y + to_x - from_x)) * y_step;
-		// new_max_im = _max_im - from_y * y_step;
+		new_min_re = _min_re + from_x * _x_step;
+		new_max_re = _max_re - (_width - to_x) * _x_step;
+		new_min_im = _min_im + from_y * _y_step;
+		new_max_im = _max_im - (_height - to_y) * _y_step;
+		// new_min_im = _min_im + (_height - (from_y + to_x - from_x)) * _y_step;
+		// new_max_im = _max_im - from_y * _y_step;
 
 		// zoom with the new values
 		zoom(new_min_re, new_max_re, new_min_im, new_max_im);
@@ -131,23 +131,24 @@ void Mandel::zoom_back()
 	}
 }
 
-void Mandel::calculate_section(int start, int end, double x_step, double y_step, double im) {
+void Mandel::calculate_section(int start_pixel_row, int end_pixel_row, double start_im) {
 	int y;
 	double re;
-	for (y = start; y < end; y++) {
-		if (y > start) {
-			im -= y_step;
+	double im = start_im;
+	for (y = start_pixel_row; y < end_pixel_row; y++) {
+		if (y > start_pixel_row) {
+			im -= _y_step;
 		}
 		re = _min_re; // start with the first pixel on the row
-		calculate_row(re, im, x_step, &_results[y*_width]);
+		calculate_row(re, im, &_results[y*_width]);
 	}
 }
 
-void Mandel::calculate_row(double re, double im, double x_step, unsigned int *results) {
+void Mandel::calculate_row(double re, double im, unsigned int *results) {
 	int x;
 	for (x = 0; x < _width; x++) {
 		if (x > 0)
-			re += x_step;
+			re += _x_step;
 
 		// save number of iterations
 		results[x] = calculate(re, im);
