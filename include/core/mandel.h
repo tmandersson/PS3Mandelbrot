@@ -27,6 +27,7 @@ private:
 	unsigned int _max_iterations;
 
 	unsigned int *_results;
+	void calculate_section(int, int, double, double, double);
 	void calculate_row(double, double, double, unsigned int *);
 	unsigned int calculate(double, double);
 };

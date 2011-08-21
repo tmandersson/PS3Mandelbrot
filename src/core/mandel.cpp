@@ -34,7 +34,6 @@ void Mandel::paint()
 	time_t time_start = time(NULL);
 
 	int x, y;
-	double re;
 	double im = _max_im;
 	_have_painted = true;
 	double x_step = (_max_re - _min_re) / _width;
@@ -50,13 +49,11 @@ void Mandel::paint()
 	{
 		old_section_limit = section_limit;
 		section_limit = (_height/sections)*current_section;
-		for (y = old_section_limit; y < section_limit; y++) {
-			if (y > 0) {
-				im -= y_step;
-			}
-			re = _min_re; // start with the first pixel on the row
-			calculate_row(re, im, x_step, &_results[y*_width]);
-		}
+		double start, end;
+		start = old_section_limit;
+		end = section_limit;
+		im = _max_im - (old_section_limit * y_step);
+		calculate_section(start, end, x_step, y_step, im);
 	}
 
 	for (y = 0; y < _height; y++) {
@@ -131,6 +128,18 @@ void Mandel::zoom_back()
 		_min_im = _old_min_im;
 		_max_im = _old_max_im;
 		zoom(_min_re, _max_re, _min_im, _max_im);
+	}
+}
+
+void Mandel::calculate_section(int start, int end, double x_step, double y_step, double im) {
+	int y;
+	double re;
+	for (y = start; y < end; y++) {
+		if (y > start) {
+			im -= y_step;
+		}
+		re = _min_re; // start with the first pixel on the row
+		calculate_row(re, im, x_step, &_results[y*_width]);
 	}
 }
 
