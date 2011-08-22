@@ -14,6 +14,8 @@ public:
 	void zoom(double, double, double, double);
 	void zoom_coord(int, int, int, int);  // zoom to pixel cords
 	void zoom_back(); // zoom back one step
+
+	void calculate_section(void *);
    
 protected:
 	int _width, _height;
@@ -28,7 +30,6 @@ private:
 
 	double _x_step, _y_step;
 	unsigned int *_results;
-	void calculate_section(void *);
 	void calculate_row(double, double, unsigned int *);
 	unsigned int calculate(double, double);
 };

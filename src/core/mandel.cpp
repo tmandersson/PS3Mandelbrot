@@ -2,6 +2,7 @@
 #include "core/mandel.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <pthread.h>
 #include <time.h>
 #include "core/mftb_profiling.h"
 
@@ -11,6 +12,7 @@ struct section_params {
 	int start_pixel_row;
 	int end_pixel_row;
 	double start_im;
+	Mandel *mandel_object;
 };
 
 Mandel::Mandel(int width, int height, IPlotter &plotter) : _plotter(plotter)
@@ -34,6 +36,12 @@ Mandel::~Mandel()
 	free(_results);
 }
 
+void *call_calculate_section(void *params)  {
+	Mandel *obj = ((section_params *)params)->mandel_object;
+	obj->calculate_section(params);
+	pthread_exit(NULL);
+}
+
 void Mandel::paint()
 {
 	mftbStart(start);
@@ -50,16 +58,28 @@ void Mandel::paint()
 	int old_section_limit;
 	section_limit = 0;
 
+	pthread_t threads[sections];
 	section_params params[sections];
-	for (int current_section = 1; current_section <= sections; current_section++)
+	for (int section_id = 0; section_id < sections; section_id++)
 	{
 		old_section_limit = section_limit;
-		section_limit = (_height/sections)*current_section;
+		section_limit = (_height/sections)*(section_id + 1);
 
-		params[current_section-1].start_pixel_row = old_section_limit;
-		params[current_section-1].end_pixel_row = section_limit;
-		params[current_section-1].start_im = _max_im - (old_section_limit * _y_step);
-		calculate_section(&params[current_section-1]);
+		params[section_id].mandel_object = this;
+		params[section_id].start_pixel_row = old_section_limit;
+		params[section_id].end_pixel_row = section_limit;
+		params[section_id].start_im = _max_im - (old_section_limit * _y_step);
+
+	    int rc = pthread_create(&threads[section_id], NULL, call_calculate_section, (void *)&params[section_id]);
+	    if (rc) {
+	    	printf("ERROR; return code from pthread_create() is %d\n", rc);
+	    	exit(-1);
+	    }
+	}
+
+	for (int section_id = 0; section_id < sections; section_id++)
+	{
+		pthread_join(threads[section_id], NULL);
 	}
 
 	// TODO: Let the working threads do this part as well.
