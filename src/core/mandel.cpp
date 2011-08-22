@@ -56,6 +56,9 @@ void Mandel::paint()
 		calculate_section(start, end, im);
 	}
 
+	// TODO: Let the working threads do this part as well.
+	// Because accessing memory on ps3 is slow. Better to write to rsx directly.
+	// Then we get rid of the alloc/free as well.
 	for (y = 0; y < _height; y++) {
 		for (x = 0; x < _width; x++) {
 			// plot the pixel with colour if it doesn't belong to the Mandel set
