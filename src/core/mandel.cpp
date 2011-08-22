@@ -52,7 +52,7 @@ void Mandel::paint()
 	_x_step = (_max_re - _min_re) / _width;
 	_y_step = (_max_im - _min_im) / _height;
 
-	int sections = 4;
+	int sections = 16;
 
 	int section_limit;
 	int old_section_limit;
