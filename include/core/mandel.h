@@ -28,7 +28,7 @@ private:
 
 	double _x_step, _y_step;
 	unsigned int *_results;
-	void calculate_section(int, int, double);
+	void calculate_section(void *);
 	void calculate_row(double, double, unsigned int *);
 	unsigned int calculate(double, double);
 };

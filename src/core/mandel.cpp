@@ -7,6 +7,12 @@
 
 const unsigned int ITERATIONS = 256;
 
+struct section_params {
+	int start_pixel_row;
+	int end_pixel_row;
+	double start_im;
+};
+
 Mandel::Mandel(int width, int height, IPlotter &plotter) : _plotter(plotter)
 {
 	_width = width;
@@ -34,7 +40,6 @@ void Mandel::paint()
 	time_t time_start = time(NULL);
 
 	int x, y;
-	double im = _max_im;
 	_have_painted = true;
 	_x_step = (_max_re - _min_re) / _width;
 	_y_step = (_max_im - _min_im) / _height;
@@ -45,15 +50,16 @@ void Mandel::paint()
 	int old_section_limit;
 	section_limit = 0;
 
+	section_params params[sections];
 	for (int current_section = 1; current_section <= sections; current_section++)
 	{
 		old_section_limit = section_limit;
 		section_limit = (_height/sections)*current_section;
-		double start, end;
-		start = old_section_limit;
-		end = section_limit;
-		im = _max_im - (old_section_limit * _y_step);
-		calculate_section(start, end, im);
+
+		params[current_section-1].start_pixel_row = old_section_limit;
+		params[current_section-1].end_pixel_row = section_limit;
+		params[current_section-1].start_im = _max_im - (old_section_limit * _y_step);
+		calculate_section(&params[current_section-1]);
 	}
 
 	// TODO: Let the working threads do this part as well.
@@ -134,7 +140,13 @@ void Mandel::zoom_back()
 	}
 }
 
-void Mandel::calculate_section(int start_pixel_row, int end_pixel_row, double start_im) {
+void Mandel::calculate_section(void *params) {
+	section_params *p;
+	p = (section_params *) params;
+	int start_pixel_row = p->start_pixel_row;
+	int end_pixel_row = p->end_pixel_row;
+	double start_im = p->start_im;
+
 	int y;
 	double re;
 	double im = start_im;

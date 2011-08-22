@@ -14,9 +14,9 @@ int main(int argc, char *argv[])
 {
 	SDL_Surface *surface = InitSDL();
 
-	Palette palette = Palette();
-	SDLPlotter plotter = SDLPlotter(surface, WIDTH, HEIGHT, palette);
-	Mandel mand = Mandel(WIDTH, HEIGHT, plotter);
+	Palette palette;
+	SDLPlotter plotter(surface, WIDTH, HEIGHT, palette);
+	Mandel mand(WIDTH, HEIGHT, plotter);
 
 	// -0.743643887037158704752191506114774, 0.131825904205311970493132056385139
 	double start_real = -0.743643887037158704752191506114774;
