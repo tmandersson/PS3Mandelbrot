@@ -14,7 +14,7 @@ PS3_CC := $(CXX)
 # override MACHDEPT from ppu_rules
 # and disable some optimizations to allow profiling
 # MACHDEP = 
-PS3_CFLAGS = -O2 -Wall -mcpu=cell $(MACHDEP) $(INCLUDE)
+PS3_CFLAGS = -g -O2 -Wall -mcpu=cell $(MACHDEP) $(INCLUDE)
 export LD	:=	$(CXX)
 LDFLAGS		=	$(MACHDEP) -Wl,-Map,$(notdir $@).map
 export BUILDDIR	:=	$(CURDIR)/ps3_build
@@ -41,7 +41,7 @@ export INCLUDE	:=	$(foreach dir,$(INCLUDES), -I$(CURDIR)/$(dir)) \
 
 #-- C/C++ linux sdl stuff -----------------------------------------
 CC = g++
-CPPFLAGS = -Wall -O3 -I$(CURDIR)/include
+CPPFLAGS = -Wall -g -O3 -I$(CURDIR)/include
 #-- End C/C++ linux sdl stuff -----------------------------------------
 
 vpath %.cpp src src/core src/ps3 src/linux

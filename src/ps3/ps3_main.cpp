@@ -17,6 +17,9 @@
 #include "core/palette.h"
 #include "ps3/rsxplotter.h"
 
+#include <sys/process.h>
+SYS_PROCESS_PARAM(1001,0x100000);
+
 #define MAX_BUFFERS 2
 
 int main(int argc,const char *argv[])
