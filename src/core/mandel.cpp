@@ -2,9 +2,39 @@
 #include "core/mandel.h"
 #include <stdio.h>
 #include <stdlib.h>
-#include <pthread.h>
 #include <time.h>
 #include "core/mftb_profiling.h"
+
+#ifdef __powerpc64__
+#include <sys/thread.h>
+typedef sys_ppu_thread_t pthread_t;
+
+int pthread_create (pthread_t *id, void *attr, void *(* __start_routine) (void *), void * __arg)
+{
+	void (* routine) (void *) = (void (*)(void *)) __start_routine;
+	return sysThreadCreate(id, routine, __arg, 1001, 0x100000, 0, NULL);
+}
+
+void pthread_exit (void *__retval) {}
+
+int pthread_join (pthread_t __th, void **__thread_return) {
+	u64 retval;
+	sysThreadJoin(__th, &retval);
+	return retval;
+}
+
+/*
+LV2_SYSCALL sysThreadJoin(sys_ppu_thread_t threadid,u64 *retval)
+{
+	lv2syscall2(44,threadid,(u64)retval);;
+	return_to_user_prog(s32);
+}
+
+*/
+
+#else
+#include <pthread.h>
+#endif
 
 const unsigned int ITERATIONS = 256;
 
@@ -40,6 +70,7 @@ void *call_calculate_section(void *params)  {
 	Mandel *obj = ((section_params *)params)->mandel_object;
 	obj->calculate_section(params);
 	pthread_exit(NULL);
+	return NULL;
 }
 
 void Mandel::paint()
