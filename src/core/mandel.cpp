@@ -18,9 +18,7 @@ int pthread_create (pthread_t *id, void *attr, void *(* __start_routine) (void *
 void pthread_exit (void *__retval) {}
 
 int pthread_join (pthread_t __th, void **__thread_return) {
-	u64 retval;
-	sysThreadJoin(__th, &retval);
-	return retval;
+	return sysThreadJoin(__th, NULL);
 }
 
 /*
