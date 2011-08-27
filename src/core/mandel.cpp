@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include "core/mftb_profiling.h"
+#include <unistd.h>
 
 #ifdef __powerpc64__
 #include <sys/thread.h>
@@ -15,20 +16,13 @@ int pthread_create (pthread_t *id, void *attr, void *(* __start_routine) (void *
 	return sysThreadCreate(id, routine, __arg, 1001, 0x100000, 0, NULL);
 }
 
-void pthread_exit (void *__retval) {}
+void pthread_exit (void *__retval) {
+	sysThreadExit(0);
+}
 
 int pthread_join (pthread_t __th, void **__thread_return) {
 	return sysThreadJoin(__th, NULL);
 }
-
-/*
-LV2_SYSCALL sysThreadJoin(sys_ppu_thread_t threadid,u64 *retval)
-{
-	lv2syscall2(44,threadid,(u64)retval);;
-	return_to_user_prog(s32);
-}
-
-*/
 
 #else
 #include <pthread.h>
@@ -106,10 +100,14 @@ void Mandel::paint()
 	    }
 	}
 
+	sleep(15);
+
+	/*
 	for (int section_id = 0; section_id < sections; section_id++)
 	{
 		pthread_join(threads[section_id], NULL);
 	}
+	*/
 
 	// TODO: Let the working threads do this part as well.
 	// Because accessing memory on ps3 is slow. Better to write to rsx directly.
