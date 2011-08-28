@@ -7,7 +7,10 @@
 #include <unistd.h>
 
 #ifdef __powerpc64__
+
 #include <sys/thread.h>
+const int CALCULATION_THREADS = 6;
+
 typedef sys_ppu_thread_t pthread_t;
 
 int pthread_create (pthread_t *id, void *attr, void *(* __start_routine) (void *), void * __arg)
@@ -26,7 +29,10 @@ int pthread_join (pthread_t __th, void **__thread_return) {
 }
 
 #else
+
 #include <pthread.h>
+const int CALCULATION_THREADS = 16;
+
 #endif
 
 const unsigned int ITERATIONS = 256;
@@ -45,23 +51,12 @@ Mandel::Mandel(int width, int height, IPlotter &plotter) : _plotter(plotter)
 	_max_iterations = ITERATIONS;
 	_old_min_re = _old_max_re = _old_min_im = _old_max_im = 0;
 	_have_painted = false; // haven't drawn the fractal yet
-
-	_results = (unsigned int*) calloc(_width*_height, sizeof(unsigned int));
-	if (!_results)
-	{
-		printf("Memory allocation failed!\n");
-		exit(1);
-	}
-}
-
-Mandel::~Mandel()
-{
-	free(_results);
 }
 
 void *call_calculate_section(void *params)  {
 	Mandel *obj = ((section_params *)params)->mandel_object;
 	obj->calculate_section(params);
+	printf("Calculation thread finished!\n");
 	pthread_exit(NULL);
 	return NULL;
 }
@@ -73,12 +68,11 @@ void Mandel::paint()
 
 	_plotter.LockSurface();
 
-	int x, y;
 	_have_painted = true;
 	_x_step = (_max_re - _min_re) / _width;
 	_y_step = (_max_im - _min_im) / _height;
 
-	int sections = 16;
+	int sections = CALCULATION_THREADS;
 
 	int section_limit;
 	int old_section_limit;
@@ -191,19 +185,17 @@ void Mandel::calculate_section(void *params) {
 			im -= _y_step;
 		}
 		re = _min_re; // start with the first pixel on the row
-		calculate_row(re, im, &_results[y*_width], y);
+		calculate_row(re, im, y);
 	}
 }
 
-void Mandel::calculate_row(double re, double im, unsigned int *results, int y) {
+void Mandel::calculate_row(double re, double im, int y) {
 	int x;
 	for (x = 0; x < _width; x++) {
 		if (x > 0)
 			re += _x_step;
 
-		// save number of iterations
 		unsigned int iterations = calculate(re, im);
-		results[x] = iterations;
 
 		if ( iterations != 0)
 			_plotter.plot(x, y, (iterations % 255) + 1);

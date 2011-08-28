@@ -11,7 +11,6 @@ public:
 class Mandel {
 public:
 	Mandel(int, int, IPlotter &);
-	virtual ~Mandel();
 
 	void zoom(double, double, double, double);
 	void zoom_coord(int, int, int, int);  // zoom to pixel cords
@@ -31,8 +30,7 @@ private:
 	unsigned int _max_iterations;
 
 	double _x_step, _y_step;
-	unsigned int *_results;
-	void calculate_row(double, double, unsigned int *, int);
+	void calculate_row(double, double, int);
 	unsigned int calculate(double, double);
 };
 
