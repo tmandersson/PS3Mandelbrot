@@ -13,7 +13,7 @@ typedef sys_ppu_thread_t pthread_t;
 int pthread_create (pthread_t *id, void *attr, void *(* __start_routine) (void *), void * __arg)
 {
 	void (* routine) (void *) = (void (*)(void *)) __start_routine;
-	return sysThreadCreate(id, routine, __arg, 1001, 0x100000, 0, NULL);
+	return sysThreadCreate(id, routine, __arg, 1001, 0x100000, THREAD_JOINABLE, NULL);
 }
 
 void pthread_exit (void *__retval) {
@@ -21,7 +21,8 @@ void pthread_exit (void *__retval) {
 }
 
 int pthread_join (pthread_t __th, void **__thread_return) {
-	return sysThreadJoin(__th, NULL);
+	u64 ret_val;
+	return sysThreadJoin(__th, &ret_val);
 }
 
 #else
@@ -100,14 +101,12 @@ void Mandel::paint()
 	    }
 	}
 
-	sleep(15);
-
-	/*
 	for (int section_id = 0; section_id < sections; section_id++)
 	{
-		pthread_join(threads[section_id], NULL);
+		if (pthread_join(threads[section_id], NULL) != 0) {
+			printf("ERROR: Thread join failed!\n");
+		}
 	}
-	*/
 
 	// TODO: Let the working threads do this part as well.
 	// Because accessing memory on ps3 is slow. Better to write to rsx directly.
