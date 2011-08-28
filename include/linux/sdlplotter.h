@@ -8,6 +8,8 @@
 class SDLPlotter : public IPlotter {
  public:
   SDLPlotter(SDL_Surface *surface, int w, int h, Palette &palette);
+  void LockSurface();
+  void UnlockAndUpdateSurface();
   void plot(int x, int y, int color);
  private:
   SDL_Surface *m_surface;

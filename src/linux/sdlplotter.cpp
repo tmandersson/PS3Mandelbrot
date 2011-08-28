@@ -11,26 +11,25 @@ SDLPlotter::SDLPlotter(SDL_Surface *surface,
   height = h;
 }
 
+void SDLPlotter::LockSurface() {
+	if (SDL_LockSurface(m_surface) != 0) {
+		cerr << "Can't get access to screen!!\n";
+		SDL_Quit();
+		exit(1);
+	}
+}
+
+void SDLPlotter::UnlockAndUpdateSurface() {
+	SDL_UnlockSurface(m_surface);
+	SDL_UpdateRect(m_surface, 0, 0, width, height);
+}
+
 void SDLPlotter::plot(int x, int y, int color)
 {
-  if (x == 0 && y == 0) {
-    // lock the screen
-    if (SDL_LockSurface(m_surface) != 0) {
-      cerr << "Can't get access to screen!!\n";
-      SDL_Quit();
-      exit(1);
-    }
-  }
-
-  putpixel(m_surface, x, y, SDL_MapRGB(m_surface->format,
+	putpixel(m_surface, x, y, SDL_MapRGB(m_surface->format,
 		  _palette.GetR(color),
 		  _palette.GetG(color),
 		  _palette.GetB(color)));
-  if (x == width - 1 && y == height - 1)
-    {
-      SDL_UnlockSurface(m_surface);
-      SDL_UpdateRect(m_surface, 0, 0, width, height);
-    }
 }
 
 

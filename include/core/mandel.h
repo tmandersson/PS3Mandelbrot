@@ -3,6 +3,8 @@
 
 class IPlotter {
 public:
+	virtual void LockSurface() = 0;
+	virtual void UnlockAndUpdateSurface() = 0;
 	virtual void plot(int x, int y, int color) = 0;
 };
 
@@ -30,7 +32,7 @@ private:
 
 	double _x_step, _y_step;
 	unsigned int *_results;
-	void calculate_row(double, double, unsigned int *);
+	void calculate_row(double, double, unsigned int *, int);
 	unsigned int calculate(double, double);
 };
 

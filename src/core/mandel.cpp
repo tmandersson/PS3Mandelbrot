@@ -71,6 +71,8 @@ void Mandel::paint()
 	mftbStart(start);
 	time_t time_start = time(NULL);
 
+	_plotter.LockSurface();
+
 	int x, y;
 	_have_painted = true;
 	_x_step = (_max_re - _min_re) / _width;
@@ -108,19 +110,7 @@ void Mandel::paint()
 		}
 	}
 
-	// TODO: Let the working threads do this part as well.
-	// Because accessing memory on ps3 is slow. Better to write to rsx directly.
-	// Then we get rid of the alloc/free as well.
-	for (y = 0; y < _height; y++) {
-		for (x = 0; x < _width; x++) {
-			// plot the pixel with colour if it doesn't belong to the Mandel set
-			unsigned int iterations = _results[y*_width + x];
-			if ( iterations != 0)
-				_plotter.plot(x, y, (iterations % 255) + 1);
-			else
-				_plotter.plot(x, y, 0);
-		}
-	}
+	_plotter.UnlockAndUpdateSurface();
 
 	time_t time_end = time(NULL);
 	long unsigned time = difftime(time_end, time_start);
@@ -201,18 +191,24 @@ void Mandel::calculate_section(void *params) {
 			im -= _y_step;
 		}
 		re = _min_re; // start with the first pixel on the row
-		calculate_row(re, im, &_results[y*_width]);
+		calculate_row(re, im, &_results[y*_width], y);
 	}
 }
 
-void Mandel::calculate_row(double re, double im, unsigned int *results) {
+void Mandel::calculate_row(double re, double im, unsigned int *results, int y) {
 	int x;
 	for (x = 0; x < _width; x++) {
 		if (x > 0)
 			re += _x_step;
 
 		// save number of iterations
-		results[x] = calculate(re, im);
+		unsigned int iterations = calculate(re, im);
+		results[x] = iterations;
+
+		if ( iterations != 0)
+			_plotter.plot(x, y, (iterations % 255) + 1);
+		else
+			_plotter.plot(x, y, 0);
 	}
 }
 
