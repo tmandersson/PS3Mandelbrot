@@ -4,6 +4,8 @@ const int WIDTH = 20;
 const int HEIGHT = 20;
 
 void calculate_fractal(int *result, int pixel_width, int pixel_height, double min_re, double max_im, double x_step, double y_step);
+void print_values(int *result);
+void calculate_with_spu_faked(int *result);
 
 int main(int argc, char* argv[]) {
 	printf("\nNON SPU CODE:\n");
@@ -24,6 +26,26 @@ int main(int argc, char* argv[]) {
 	double y_step = (max_im - min_im) / HEIGHT;
 	int result[HEIGHT*WIDTH];
 	calculate_fractal(result, WIDTH, HEIGHT, min_re, max_im, x_step, y_step);
+	print_values(result);
+
+	printf("\n\nSPU CODE:\n");
+#ifdef __powerpc64__
+	int spu_result[HEIGHT*WIDTH];
+	calculate_with_spu_faked(spu_result);
+	print_values(spu_result);
+#else
+	printf("Not implemented in linux version.\n");
+#endif
+
+	return 0;
+}
+
+void calculate_with_spu_faked(int *result) {
+	for (int i=0; i<HEIGHT*WIDTH; i++)
+		result[i] = 1;
+}
+
+void print_values(int *result) {
 	for (int y=0; y<HEIGHT; y++) {
 		for (int x=0; x<WIDTH; x++)
 		{
@@ -35,11 +57,6 @@ int main(int argc, char* argv[]) {
 		}
 		printf("\n");
 	}
-
-	printf("\n\nSPU CODE:\n");
-	printf("Not implemented in linux version.\n");
-
-	return 0;
 }
 
 const unsigned int MAX_ITERATIONS = 256;
