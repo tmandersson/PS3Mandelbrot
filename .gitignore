@@ -7,6 +7,9 @@ sdl_mandel
 *.self
 *.pkg
 ps3_build
+spu_bin.h
+**/*/build
+*.bin
 
 .cproject
 .project

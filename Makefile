@@ -49,6 +49,8 @@ vpath %.cpp src src/core src/ps3 src/linux src/spu_test
 vpath %.c src src/core/ src/ps3 src/linux src/spu_test
 vpath %.h include include/core include/ps3 include/linux
 
+.PHONY: spu.bin
+
 all: spu.bin.o sdl_mandel ps3 spu_linux_test
 ps3: spu.bin.o mandel.self mandel.pkg spu_test.self spu_test.pkg
 run:

@@ -61,6 +61,9 @@ void calculate_with_spu_faked(int *result) {
 	sysSpuImageImport(&image,spu_bin,SPU_IMAGE_PROTECT);
 	sysSpuRawImageLoad(spu_id,&image);
 
+	sysSpuRawWriteProblemStorage(spu_id,SPU_RunCtrl,1);
+	while (!(sysSpuRawReadProblemStorage(spu_id,SPU_MBox_Status) & 1));
+
 	sysSpuRawDestroy(spu_id);
 	sysSpuImageClose(&image);
 }
