@@ -1,11 +1,16 @@
 #include <stdio.h>
 
+#ifdef __powerpc64__
+#include <sys/spu.h>
+#include "spu_bin.h"
+void calculate_with_spu_faked(int *result);
+#endif
+
 const int WIDTH = 20;
 const int HEIGHT = 20;
 
 void calculate_fractal(int *result, int pixel_width, int pixel_height, double min_re, double max_im, double x_step, double y_step);
 void print_values(int *result);
-void calculate_with_spu_faked(int *result);
 
 int main(int argc, char* argv[]) {
 	printf("\nNON SPU CODE:\n");
@@ -40,10 +45,26 @@ int main(int argc, char* argv[]) {
 	return 0;
 }
 
+#ifdef __powerpc64__
 void calculate_with_spu_faked(int *result) {
 	for (int i=0; i<HEIGHT*WIDTH; i++)
 		result[i] = 1;
+
+	sysSpuImage image;
+	u32 spu_id = 0;
+
+	const int SPU_COUNT = 6;
+	const int RAW_SPU_COUNT = 5;
+	sysSpuInitialize(SPU_COUNT, RAW_SPU_COUNT);
+	sysSpuRawCreate(&spu_id,NULL);
+
+	sysSpuImageImport(&image,spu_bin,SPU_IMAGE_PROTECT);
+	sysSpuRawImageLoad(spu_id,&image);
+
+	sysSpuRawDestroy(spu_id);
+	sysSpuImageClose(&image);
 }
+#endif
 
 void print_values(int *result) {
 	for (int y=0; y<HEIGHT; y++) {

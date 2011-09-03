@@ -36,7 +36,8 @@ LIBDIRS	:= $(PORTLIBS)
 export INCLUDE	:=	$(foreach dir,$(INCLUDES), -I$(CURDIR)/$(dir)) \
 					$(foreach dir,$(LIBDIRS),-I$(dir)/include) \
 					$(LIBPSL1GHT_INC) -I$(CURDIR)/include \
-					-I$(PS3DEV)/ppu/lib/gcc/powerpc64-ps3-elf/4.5.2/include
+					-I$(PS3DEV)/ppu/lib/gcc/powerpc64-ps3-elf/4.5.2/include \
+					-I$(CURDIR)
 #-- END PS3/PSL1GHT stuff -----------------------------------------
 
 #-- C/C++ linux sdl stuff -----------------------------------------
@@ -48,8 +49,8 @@ vpath %.cpp src src/core src/ps3 src/linux src/spu_test
 vpath %.c src src/core/ src/ps3 src/linux src/spu_test
 vpath %.h include include/core include/ps3 include/linux
 
-all: sdl_mandel ps3 spu_linux_test
-ps3: mandel.self mandel.pkg spu_test.self spu_test.pkg
+all: spu.bin.o sdl_mandel ps3 spu_linux_test
+ps3: spu.bin.o mandel.self mandel.pkg spu_test.self spu_test.pkg
 run:
 	ps3load mandel.self
 run_test:
@@ -58,7 +59,7 @@ run_test:
 mandel.self: mandel.elf
 mandel.elf: ps3_main.pso rsxutil.pso palette.pso rsxplotter.pso mandel.pso
 spu_test.self: spu_test.elf
-spu_test.elf: spu_test_main.pso
+spu_test.elf: spu_test_main.pso spu.bin.o
 
 %.elf:
 	$(PS3_CC) $(PS3_CFLAGS) -o $@ $^ $(LIBS)
@@ -70,6 +71,13 @@ spu_test.elf: spu_test_main.pso
 	$(PS3_CC) $(PS3_CFLAGS) -o $@ -c $<
 %.pso: %.c
 	$(PS3_CC) $(PS3_CFLAGS) -o $@ -c $<
+	
+spu.bin:
+	@$(MAKE) -C src/spu
+	
+%.bin.o: %.bin
+	@echo $(notdir $<)
+	@$(bin2o)
 	
 sdl_mandel: sdl_main.lo mandel.lo sdlplotter.lo palette.lo
 	$(CC) $(CPPFLAGS) -o $@ $^ `sdl-config --libs` -pg
@@ -88,4 +96,5 @@ spu_linux_test: spu_test_main.lo
 
 clean: clean-all
 clean-all:
-	  -rm -f mandel sdl_mandel *.o *.lo *.pso *.elf *.self *.pkg
+	  -rm -f mandel sdl_mandel *.o *.lo *.pso *.elf *.self *.pkg *.bin spu_bin.h
+	  @$(MAKE) -C src/spu clean 
