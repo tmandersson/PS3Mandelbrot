@@ -44,26 +44,46 @@ CC = g++
 CPPFLAGS = -Wall -g -O3 -I$(CURDIR)/include
 #-- End C/C++ linux sdl stuff -----------------------------------------
 
-vpath %.cpp src src/core src/ps3 src/linux
-vpath %.c src src/core/ src/ps3 src/linux
+vpath %.cpp src src/core src/ps3 src/linux src/spu_test
+vpath %.c src src/core/ src/ps3 src/linux src/spu_test
 vpath %.h include include/core include/ps3 include/linux
 
-all: sdl_mandel ps3
-ps3: mandel.self mandel.pkg
+all: sdl_mandel ps3 spu_linux_test
+ps3: mandel.self mandel.pkg spu_test.self spu_test.pkg
 run:
 	ps3load mandel.self
-
+run_test:
+	ps3load spu_test.self
+	
 mandel.self: mandel.elf
 mandel.elf: ps3_main.pso rsxutil.pso palette.pso rsxplotter.pso mandel.pso
+spu_test.self: spu_test.elf
+spu_test.elf: spu_test_main.pso
+
 %.elf:
 	$(PS3_CC) $(PS3_CFLAGS) -o $@ $^ $(LIBS)
 %.pso: %.cpp %.h
 	$(PS3_CC) $(PS3_CFLAGS) -o $@ -c $<
-
+%.pso: %.cpp
+	$(PS3_CC) $(PS3_CFLAGS) -o $@ -c $<
+%.pso: %.c %.h
+	$(PS3_CC) $(PS3_CFLAGS) -o $@ -c $<
+%.pso: %.c
+	$(PS3_CC) $(PS3_CFLAGS) -o $@ -c $<
+	
 sdl_mandel: sdl_main.lo mandel.lo sdlplotter.lo palette.lo
 	$(CC) $(CPPFLAGS) -o $@ $^ `sdl-config --libs` -pg
+	
+spu_linux_test: spu_test_main.lo
+	$(CC) $(CPPFLAGS) -o $@ $^
 
 %.lo: %.cpp %.h
+	$(CC) $(CPPFLAGS) -o $@ -c $< -pg
+%.lo: %.cpp
+	$(CC) $(CPPFLAGS) -o $@ -c $< -pg
+%.lo: %.c %.h
+	$(CC) $(CPPFLAGS) -o $@ -c $< -pg
+%.lo: %.c
 	$(CC) $(CPPFLAGS) -o $@ -c $< -pg
 
 clean: clean-all
