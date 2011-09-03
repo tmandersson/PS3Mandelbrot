@@ -1,4 +1,3 @@
-// mandel.cpp
 #include "core/mandel.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -9,7 +8,7 @@
 #ifdef __powerpc64__
 
 #include <sys/thread.h>
-const int CALCULATION_THREADS = 6;
+const int CALCULATION_THREADS = 5;
 
 typedef sys_ppu_thread_t pthread_t;
 
@@ -56,7 +55,6 @@ Mandel::Mandel(int width, int height, IPlotter &plotter) : _plotter(plotter)
 void *call_calculate_section(void *params)  {
 	Mandel *obj = ((section_params *)params)->mandel_object;
 	obj->calculate_section(params);
-	printf("Calculation thread finished!\n");
 	pthread_exit(NULL);
 	return NULL;
 }
