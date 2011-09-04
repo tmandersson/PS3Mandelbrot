@@ -56,13 +56,16 @@ void calculate_with_spu_faked(int *result) {
 	const int SPU_COUNT = 6;
 	const int RAW_SPU_COUNT = 5;
 	sysSpuInitialize(SPU_COUNT, RAW_SPU_COUNT);
-	sysSpuRawCreate(&spu_id,NULL);
+	sysSpuRawCreate(&spu_id, NULL);
 
-	sysSpuImageImport(&image,spu_bin,SPU_IMAGE_PROTECT);
-	sysSpuRawImageLoad(spu_id,&image);
+	sysSpuImageImport(&image, spu_bin, SPU_IMAGE_PROTECT);
+	sysSpuRawImageLoad(spu_id, &image);
 
-	sysSpuRawWriteProblemStorage(spu_id,SPU_RunCtrl,1);
-	while (!(sysSpuRawReadProblemStorage(spu_id,SPU_MBox_Status) & 1));
+	sysSpuRawWriteProblemStorage(spu_id, SPU_RunCtrl, 1);
+	while (!(sysSpuRawReadProblemStorage(spu_id, SPU_MBox_Status) & 1));
+
+	for (int i=0; i<HEIGHT*WIDTH; i++)
+			result[i] = sysSpuRawReadProblemStorage(spu_id, SPU_Out_MBox);
 
 	sysSpuRawDestroy(spu_id);
 	sysSpuImageClose(&image);

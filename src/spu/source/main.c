@@ -4,6 +4,7 @@ const int WIDTH = 20;
 const int HEIGHT = 20;
 
 void calculate_fractal(int *result, int pixel_width, int pixel_height, double min_re, double max_im, double x_step, double y_step);
+
 int main()
 {
 	double start_real = -0.743643887037158704752191506114774;
@@ -22,11 +23,11 @@ int main()
 	double y_step = (max_im - min_im) / HEIGHT;
 	int result[HEIGHT*WIDTH];
 
-	int i;
-	for (i=0; i < 10000; i++)
-		calculate_fractal(result, WIDTH, HEIGHT, min_re, max_im, x_step, y_step);
+	calculate_fractal(result, WIDTH, HEIGHT, min_re, max_im, x_step, y_step);
 
-	spu_writech(SPU_WrOutMbox,1);
+	unsigned int i;
+	for(i=0; i < HEIGHT*WIDTH; i++)
+		spu_writech(SPU_WrOutMbox, result[i]);
 	return 0;
 }
 
