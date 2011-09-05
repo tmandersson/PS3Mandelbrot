@@ -3,7 +3,7 @@
 #ifdef __powerpc64__
 #include <sys/spu.h>
 #include "spu_bin.h"
-void calculate_with_spu_faked(int *result);
+void calculate_with_spu(int *result, int pixel_width, int pixel_height, double min_re, double max_im, double x_step, double y_step);
 #endif
 
 const int WIDTH = 20;
@@ -36,17 +36,20 @@ int main(int argc, char* argv[]) {
 	printf("\n\nSPU CODE:\n");
 #ifdef __powerpc64__
 	int spu_result[HEIGHT*WIDTH];
-	calculate_with_spu_faked(spu_result);
+	calculate_with_spu(spu_result, WIDTH, HEIGHT, min_re, max_im, x_step, y_step);
 	print_values(spu_result);
 #else
 	printf("Not implemented in linux version.\n");
 #endif
 
+	printf("Sizeof int: %lu", sizeof(int));
+	printf("Sizeof double: %lu", sizeof(double));
+	printf("\n\nExiting!\n");
 	return 0;
 }
 
 #ifdef __powerpc64__
-void calculate_with_spu_faked(int *result) {
+void calculate_with_spu(int *result, int pixel_width, int pixel_height, double min_re, double max_im, double x_step, double y_step) {
 	for (int i=0; i<HEIGHT*WIDTH; i++)
 		result[i] = 1;
 
@@ -62,6 +65,14 @@ void calculate_with_spu_faked(int *result) {
 	sysSpuRawImageLoad(spu_id, &image);
 
 	sysSpuRawWriteProblemStorage(spu_id, SPU_RunCtrl, 1);
+	sysSpuRawWriteProblemStorage(spu_id, SPU_In_MBox, pixel_width);
+	sysSpuRawWriteProblemStorage(spu_id, SPU_In_MBox, pixel_height);
+
+	//sysSpuRawWriteProblemStorageDW(spu_id, SPU_In_MBox, min_re);
+	/*sysSpuRawWriteProblemStorage(spu_id, SPU_In_MBox, max_im);
+	sysSpuRawWriteProblemStorage(spu_id, SPU_In_MBox, x_step);
+	sysSpuRawWriteProblemStorage(spu_id, SPU_In_MBox, y_step);
+*/
 	while (!(sysSpuRawReadProblemStorage(spu_id, SPU_MBox_Status) & 1));
 
 	for (int i=0; i<HEIGHT*WIDTH; i++)

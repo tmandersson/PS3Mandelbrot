@@ -1,12 +1,18 @@
 #include <spu_intrinsics.h>
 
-const int WIDTH = 20;
-const int HEIGHT = 20;
-
 void calculate_fractal(int *result, int pixel_width, int pixel_height, double min_re, double max_im, double x_step, double y_step);
 
 int main()
 {
+
+	int pixel_width = spu_readch(SPU_RdInMbox);
+	int pixel_height = spu_readch(SPU_RdInMbox);
+	//double min_re1 = si_to_double(si_rdch((SPU_RdInMbox)));
+	/*double max_im1 = spu_readch(SPU_RdInMbox);
+	double x_step1 = spu_readch(SPU_RdInMbox);
+	double y_step1 = spu_readch(SPU_RdInMbox);
+	*/
+
 	double start_real = -0.743643887037158704752191506114774;
 	double start_imag = 0.131825904205311970493132056385139;
 	double x_aspect = 1;
@@ -19,14 +25,14 @@ int main()
 	max_re = start_real+offset_real;
 	min_im = start_imag-offset_imag;
 	max_im = start_imag+offset_imag;
-	double x_step = (max_re - min_re) / WIDTH;
-	double y_step = (max_im - min_im) / HEIGHT;
-	int result[HEIGHT*WIDTH];
+	double x_step = (max_re - min_re) / pixel_width;
+	double y_step = (max_im - min_im) / pixel_height;
+	int result[pixel_width*pixel_height];
 
-	calculate_fractal(result, WIDTH, HEIGHT, min_re, max_im, x_step, y_step);
+	calculate_fractal(result, pixel_width, pixel_height, min_re, max_im, x_step, y_step);
 
 	unsigned int i;
-	for(i=0; i < HEIGHT*WIDTH; i++)
+	for(i=0; i < pixel_width*pixel_height; i++)
 		spu_writech(SPU_WrOutMbox, result[i]);
 	return 0;
 }
