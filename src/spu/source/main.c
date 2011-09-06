@@ -1,12 +1,15 @@
 #include <spu_intrinsics.h>
+#include <spu_mfcio.h>
+#include <sys/spu_thread.h>
 
 void calculate_fractal(int *result, int pixel_width, int pixel_height, double min_re, double max_im, double x_step, double y_step);
 
-int main()
+int main(uint64_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4)
 {
-
-	int pixel_width = spu_readch(SPU_RdInMbox);
-	int pixel_height = spu_readch(SPU_RdInMbox);
+	// TODO: Get address to structure with all parameters from PPU
+	//void *p = spu_readch(SPU_RdInMbox);
+	int pixel_width = 20;
+	int pixel_height = 20;
 	//double min_re1 = si_to_double(si_rdch((SPU_RdInMbox)));
 	/*double max_im1 = spu_readch(SPU_RdInMbox);
 	double x_step1 = spu_readch(SPU_RdInMbox);
@@ -31,12 +34,17 @@ int main()
 
 	calculate_fractal(result, pixel_width, pixel_height, min_re, max_im, x_step, y_step);
 
-	unsigned int i;
-	for(i=0; i < pixel_width*pixel_height; i++)
-		spu_writech(SPU_WrOutMbox, result[i]);
+	// TODO: Usa dma to transfer result to PPU instead.
+//	unsigned int i;
+//	for(i=0; i < pixel_width*pixel_height; i++)
+//		spu_writech(SPU_WrOutMbox, result[i]);
+
+	spu_thread_exit(0);
 	return 0;
 }
 
+// TODO: Share code with PPU side instead.
+// TODO: Get number of iterations as parameter.
 const unsigned int MAX_ITERATIONS = 256;
 unsigned int calculate(double c_re, double c_im)
 {

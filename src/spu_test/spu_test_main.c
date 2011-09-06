@@ -44,41 +44,40 @@ int main(int argc, char* argv[]) {
 
 	printf("Sizeof int: %lu", sizeof(int));
 	printf("Sizeof double: %lu", sizeof(double));
+	printf("Sizeof void*: %lu", sizeof(void*));
 	printf("\n\nExiting!\n");
 	return 0;
 }
 
 #ifdef __powerpc64__
+#define ptr2ea(x)			((u64)((void*)(x)))
+
 void calculate_with_spu(int *result, int pixel_width, int pixel_height, double min_re, double max_im, double x_step, double y_step) {
 	for (int i=0; i<HEIGHT*WIDTH; i++)
 		result[i] = 1;
 
 	sysSpuImage image;
-	u32 spu_id = 0;
+	u32 group_id, thread_id;
+	u32 cause, status;
+	int thread_count = 1;
+	int priority = 100;
+	sysSpuThreadGroupAttribute grpattr = { 7+1, ptr2ea("fractal"), 0, 0 };
+	sysSpuThreadAttribute attr = { ptr2ea("f_thread"), 8+1, SPU_THREAD_ATTR_NONE };
+	sysSpuThreadArgument arg = { 0, 0, 0, 0 };
 
-	const int SPU_COUNT = 6;
-	const int RAW_SPU_COUNT = 5;
-	sysSpuInitialize(SPU_COUNT, RAW_SPU_COUNT);
-	sysSpuRawCreate(&spu_id, NULL);
-
+	sysSpuInitialize(6, 0);
+	sysSpuThreadGroupCreate(&group_id, thread_count, priority, &grpattr);
 	sysSpuImageImport(&image, spu_bin, SPU_IMAGE_PROTECT);
-	sysSpuRawImageLoad(spu_id, &image);
+	int index_in_group = 0;
+	sysSpuThreadInitialize(&thread_id, group_id, index_in_group, &image, &attr, &arg);
 
-	sysSpuRawWriteProblemStorage(spu_id, SPU_RunCtrl, 1);
-	sysSpuRawWriteProblemStorage(spu_id, SPU_In_MBox, pixel_width);
-	sysSpuRawWriteProblemStorage(spu_id, SPU_In_MBox, pixel_height);
+	sysSpuThreadGroupStart(group_id);
+	sysSpuThreadGroupJoin(group_id, &cause, &status);
 
-	//sysSpuRawWriteProblemStorageDW(spu_id, SPU_In_MBox, min_re);
-	/*sysSpuRawWriteProblemStorage(spu_id, SPU_In_MBox, max_im);
-	sysSpuRawWriteProblemStorage(spu_id, SPU_In_MBox, x_step);
-	sysSpuRawWriteProblemStorage(spu_id, SPU_In_MBox, y_step);
-*/
-	while (!(sysSpuRawReadProblemStorage(spu_id, SPU_MBox_Status) & 1));
+//	for (int i=0; i<HEIGHT*WIDTH; i++)
+//			result[i] = sysSpuRawReadProblemStorage(spu_id, SPU_Out_MBox);
 
-	for (int i=0; i<HEIGHT*WIDTH; i++)
-			result[i] = sysSpuRawReadProblemStorage(spu_id, SPU_Out_MBox);
-
-	sysSpuRawDestroy(spu_id);
+	sysSpuThreadGroupDestroy(group_id);
 	sysSpuImageClose(&image);
 }
 #endif
