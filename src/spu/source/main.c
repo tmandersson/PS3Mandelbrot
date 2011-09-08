@@ -4,10 +4,10 @@
 
 void calculate_fractal(int *result, int pixel_width, int pixel_height, double min_re, double max_im, double x_step, double y_step);
 
-int main(uint64_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4)
+int main(uint64_t dest_addr, uint64_t arg2, uint64_t arg3, uint64_t arg4)
 {
 	// TODO: Get address to structure with all parameters from PPU
-	void *destination = arg1;
+	void *p_dest_addr = dest_addr;
 
 	int pixel_width = 20;
 	int pixel_height = 20;
@@ -34,7 +34,7 @@ int main(uint64_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4)
 	int result[pixel_width*pixel_height];
 
 	calculate_fractal(result, pixel_width, pixel_height, min_re, max_im, x_step, y_step);
-	mfc_put(result, destination, 256*4, 0, 0, 0);
+	mfc_put(result, p_dest_addr, 256*4, 0, 0, 0);
 
 	// TODO: Usa dma to transfer result to PPU instead.
 //	unsigned int i;
