@@ -7,7 +7,8 @@ void calculate_fractal(int *result, int pixel_width, int pixel_height, double mi
 int main(uint64_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4)
 {
 	// TODO: Get address to structure with all parameters from PPU
-	//void *p = spu_readch(SPU_RdInMbox);
+	void *destination = arg1;
+
 	int pixel_width = 20;
 	int pixel_height = 20;
 	//double min_re1 = si_to_double(si_rdch((SPU_RdInMbox)));
@@ -33,6 +34,7 @@ int main(uint64_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4)
 	int result[pixel_width*pixel_height];
 
 	calculate_fractal(result, pixel_width, pixel_height, min_re, max_im, x_step, y_step);
+	mfc_put(result, destination, 256*4, 0, 0, 0);
 
 	// TODO: Usa dma to transfer result to PPU instead.
 //	unsigned int i;

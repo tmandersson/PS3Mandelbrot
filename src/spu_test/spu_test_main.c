@@ -56,6 +56,8 @@ void calculate_with_spu(int *result, int pixel_width, int pixel_height, double m
 	for (int i=0; i<HEIGHT*WIDTH; i++)
 		result[i] = 1;
 
+	void *buffer = malloc(sizeof(int) * HEIGHT * WIDTH);
+
 	sysSpuImage image;
 	u32 group_id, thread_id;
 	u32 cause, status;
@@ -63,7 +65,7 @@ void calculate_with_spu(int *result, int pixel_width, int pixel_height, double m
 	int priority = 100;
 	sysSpuThreadGroupAttribute grpattr = { 7+1, ptr2ea("fractal"), 0, 0 };
 	sysSpuThreadAttribute attr = { ptr2ea("f_thread"), 8+1, SPU_THREAD_ATTR_NONE };
-	sysSpuThreadArgument arg = { 0, 0, 0, 0 };
+	sysSpuThreadArgument arg = { (u64)buffer, 0, 0, 0 };
 
 	sysSpuInitialize(6, 0);
 	sysSpuThreadGroupCreate(&group_id, thread_count, priority, &grpattr);
@@ -74,11 +76,13 @@ void calculate_with_spu(int *result, int pixel_width, int pixel_height, double m
 	sysSpuThreadGroupStart(group_id);
 	sysSpuThreadGroupJoin(group_id, &cause, &status);
 
-//	for (int i=0; i<HEIGHT*WIDTH; i++)
-//			result[i] = sysSpuRawReadProblemStorage(spu_id, SPU_Out_MBox);
+	int *p = (int *)buffer;
+	for (int i=0; i<HEIGHT*WIDTH; i++)
+			result[i] = (int) *(p+i);
 
 	sysSpuThreadGroupDestroy(group_id);
 	sysSpuImageClose(&image);
+	free(buffer);
 }
 #endif
 
