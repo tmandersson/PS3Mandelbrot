@@ -56,7 +56,9 @@ void calculate_with_spu(int *result, int pixel_width, int pixel_height, double m
 	for (int i=0; i<HEIGHT*WIDTH; i++)
 		result[i] = 1;
 
-	void *buffer = malloc(sizeof(int) * HEIGHT * WIDTH);
+	int size = sizeof(int) * pixel_width * pixel_height;
+	size = size + (size%16); // need to dma transfer full blocks of 16 bytes
+	void *buffer = malloc(size);
 
 	sysSpuImage image;
 	u32 group_id, thread_id;
