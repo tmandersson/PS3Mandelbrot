@@ -4,10 +4,23 @@
 
 void calculate_fractal(int *result, int pixel_width, int pixel_height, double min_re, double max_im, double x_step, double y_step);
 
-int main(uint64_t dest_addr, uint64_t arg2, uint64_t arg3, uint64_t arg4)
+struct fractal_params {
+	int pixel_width;
+	int pixel_height;
+	double min_re;
+	double max_im;
+	double x_step;
+	double y_step;
+	double padding;
+};
+
+int main(uint64_t dest_addr, uint64_t param_addr, uint64_t param_size, uint64_t arg4)
 {
 	// TODO: Get address to structure with all parameters from PPU
 	void *p_dest_addr = (void*) dest_addr;
+
+	volatile struct fractal_params params;
+	mfc_get(&params, (void*) param_addr, param_size, 0, 0, 0);
 
 	int pixel_width = 20;
 	int pixel_height = 20;
@@ -35,14 +48,11 @@ int main(uint64_t dest_addr, uint64_t arg2, uint64_t arg3, uint64_t arg4)
 
 	calculate_fractal(result, pixel_width, pixel_height, min_re, max_im, x_step, y_step);
 
-	int size = sizeof(int) * pixel_width * pixel_height;
-	size = size + (size%16); // need to dma transfer full blocks of 16 bytes
-	mfc_put(result, p_dest_addr, 512*4, 0, 0, 0);
+	result[0] = (int) param_size;
 
-	// TODO: Usa dma to transfer result to PPU instead.
-//	unsigned int i;
-//	for(i=0; i < pixel_width*pixel_height; i++)
-//		spu_writech(SPU_WrOutMbox, result[i]);
+	int transfer_size = sizeof(int) * pixel_width * pixel_height;
+	transfer_size = transfer_size + (transfer_size%16); // need to dma transfer full blocks of 16 bytes
+	mfc_put(result, p_dest_addr, transfer_size, 0, 0, 0);
 
 	spu_thread_exit(0);
 	return 0;

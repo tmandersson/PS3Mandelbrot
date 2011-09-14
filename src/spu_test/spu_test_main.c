@@ -52,13 +52,39 @@ int main(int argc, char* argv[]) {
 #ifdef __powerpc64__
 #define ptr2ea(x)			((u64)((void*)(x)))
 
+struct fractal_params {
+	int pixel_width;
+	int pixel_height;
+	double min_re;
+	double max_im;
+	double x_step;
+	double y_step;
+	double padding;
+};
+
+static vu32 spu_result __attribute__((aligned(128))) = 0;
+static char spu_text[] __attribute__((aligned(128))) = "abCdefGhIJklMnOP";
+
+static struct fractal_params params __attribute__((aligned(128)));
+
 void calculate_with_spu(int *result, int pixel_width, int pixel_height, double min_re, double max_im, double x_step, double y_step) {
+	params.pixel_width = pixel_width;
+	params.pixel_height = pixel_height;
+	params.min_re = min_re;
+	params.max_im = max_im;
+	params.x_step = x_step;
+	params.y_step = y_step;
+
+	((struct fractal_params*)((u64) &params))->pixel_width = pixel_width;
+	printf("Params location address: 0x%X\n", &params);
+	printf("Params location address: 0x%X\n", (u64)&params);
+
 	for (int i=0; i<HEIGHT*WIDTH; i++)
 		result[i] = 1;
 
 	int size = sizeof(int) * pixel_width * pixel_height;
 	size = size + (size%16); // need to dma transfer full blocks of 16 bytes
-	void *buffer = malloc(size);
+	void *result_buffer = malloc(size);
 
 	sysSpuImage image;
 	u32 group_id, thread_id;
@@ -67,24 +93,28 @@ void calculate_with_spu(int *result, int pixel_width, int pixel_height, double m
 	int priority = 100;
 	sysSpuThreadGroupAttribute grpattr = { 7+1, ptr2ea("fractal"), 0, 0 };
 	sysSpuThreadAttribute attr = { ptr2ea("f_thread"), 8+1, SPU_THREAD_ATTR_NONE };
-	sysSpuThreadArgument arg = { (u64)buffer, 0, 0, 0 };
+	sysSpuThreadArgument arg = { 0, 0, 0, 0 };
+	printf("Sizeof params: %i\n", sizeof(fractal_params));
 
 	sysSpuInitialize(6, 0);
 	sysSpuThreadGroupCreate(&group_id, thread_count, priority, &grpattr);
 	sysSpuImageImport(&image, spu_bin, SPU_IMAGE_PROTECT);
 	int index_in_group = 0;
+	arg.arg0 = (u64) result_buffer;
+	arg.arg1 = ptr2ea(&params);
+	arg.arg2 = sizeof(fractal_params);
 	sysSpuThreadInitialize(&thread_id, group_id, index_in_group, &image, &attr, &arg);
 
 	sysSpuThreadGroupStart(group_id);
 	sysSpuThreadGroupJoin(group_id, &cause, &status);
 
-	int *p = (int *)buffer;
+	int *p = (int *) result_buffer;
 	for (int i=0; i<HEIGHT*WIDTH; i++)
 			result[i] = (int) *(p+i);
 
 	sysSpuThreadGroupDestroy(group_id);
 	sysSpuImageClose(&image);
-	free(buffer);
+	free(result_buffer);
 }
 #endif
 
