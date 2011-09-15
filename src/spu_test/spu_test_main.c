@@ -59,9 +59,8 @@ struct fractal_params {
 	double padding;
 };
 
-static struct fractal_params params __attribute__((aligned(128)));
-
 void calculate_with_spu(int *result, int pixel_width, int pixel_height, double min_re, double max_im, double x_step, double y_step) {
+	static struct fractal_params params __attribute__((aligned(16)));
 	params.pixel_width = pixel_width;
 	params.pixel_height = pixel_height;
 	params.min_re = min_re;
@@ -88,6 +87,7 @@ void calculate_with_spu(int *result, int pixel_width, int pixel_height, double m
 	sysSpuInitialize(6, 0);
 	sysSpuThreadGroupCreate(&group_id, thread_count, priority, &grpattr);
 	sysSpuImageImport(&image, spu_bin, SPU_IMAGE_PROTECT);
+
 	int index_in_group = 0;
 	arg.arg0 = ptr2ea(result_buffer);
 	arg.arg1 = ptr2ea(&params);
