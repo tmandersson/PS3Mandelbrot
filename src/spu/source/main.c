@@ -14,13 +14,13 @@ struct fractal_params {
 	double padding;
 };
 
-int main(uint64_t dest_addr, uint64_t param_addr, uint64_t param_size, uint64_t arg4)
+int main(uint64_t dest_addr, uint64_t param_addr, uint64_t arg3, uint64_t arg4)
 {
 	// TODO: Get address to structure with all parameters from PPU
 	void *p_dest_addr = (void*) dest_addr;
 
-	volatile struct fractal_params params;
-	mfc_get(&params, (void*) param_addr, param_size, 0, 0, 0);
+	struct fractal_params params;
+	mfc_get(&params, (void*) param_addr, sizeof(struct fractal_params), 0, 0, 0);
 
 	int pixel_width = 20;
 	int pixel_height = 20;
@@ -47,8 +47,6 @@ int main(uint64_t dest_addr, uint64_t param_addr, uint64_t param_size, uint64_t 
 	int result[pixel_width*pixel_height];
 
 	calculate_fractal(result, pixel_width, pixel_height, min_re, max_im, x_step, y_step);
-
-	result[0] = (int) param_size;
 
 	int transfer_size = sizeof(int) * pixel_width * pixel_height;
 	transfer_size = transfer_size + (transfer_size%16); // need to dma transfer full blocks of 16 bytes

@@ -42,9 +42,6 @@ int main(int argc, char* argv[]) {
 	printf("Not implemented in linux version.\n");
 #endif
 
-	printf("Sizeof int: %lu", sizeof(int));
-	printf("Sizeof double: %lu", sizeof(double));
-	printf("Sizeof void*: %lu", sizeof(void*));
 	printf("\n\nExiting!\n");
 	return 0;
 }
@@ -62,9 +59,6 @@ struct fractal_params {
 	double padding;
 };
 
-static vu32 spu_result __attribute__((aligned(128))) = 0;
-static char spu_text[] __attribute__((aligned(128))) = "abCdefGhIJklMnOP";
-
 static struct fractal_params params __attribute__((aligned(128)));
 
 void calculate_with_spu(int *result, int pixel_width, int pixel_height, double min_re, double max_im, double x_step, double y_step) {
@@ -74,10 +68,6 @@ void calculate_with_spu(int *result, int pixel_width, int pixel_height, double m
 	params.max_im = max_im;
 	params.x_step = x_step;
 	params.y_step = y_step;
-
-	((struct fractal_params*)((u64) &params))->pixel_width = pixel_width;
-	printf("Params location address: 0x%X\n", &params);
-	printf("Params location address: 0x%X\n", (u64)&params);
 
 	for (int i=0; i<HEIGHT*WIDTH; i++)
 		result[i] = 1;
@@ -94,15 +84,13 @@ void calculate_with_spu(int *result, int pixel_width, int pixel_height, double m
 	sysSpuThreadGroupAttribute grpattr = { 7+1, ptr2ea("fractal"), 0, 0 };
 	sysSpuThreadAttribute attr = { ptr2ea("f_thread"), 8+1, SPU_THREAD_ATTR_NONE };
 	sysSpuThreadArgument arg = { 0, 0, 0, 0 };
-	printf("Sizeof params: %i\n", sizeof(fractal_params));
 
 	sysSpuInitialize(6, 0);
 	sysSpuThreadGroupCreate(&group_id, thread_count, priority, &grpattr);
 	sysSpuImageImport(&image, spu_bin, SPU_IMAGE_PROTECT);
 	int index_in_group = 0;
-	arg.arg0 = (u64) result_buffer;
+	arg.arg0 = ptr2ea(result_buffer);
 	arg.arg1 = ptr2ea(&params);
-	arg.arg2 = sizeof(fractal_params);
 	sysSpuThreadInitialize(&thread_id, group_id, index_in_group, &image, &attr, &arg);
 
 	sysSpuThreadGroupStart(group_id);
