@@ -2,7 +2,7 @@
 #include <spu_mfcio.h>
 #include <sys/spu_thread.h>
 
-void calculate_fractal(int *result, int pixel_width, int pixel_height, double min_re, double max_im, double x_step, double y_step);
+void calculate_fractal(int *result, int pixel_width, int pixel_height, int max_iterations, double min_re, double max_im, double x_step, double y_step);
 
 struct fractal_params {
 	int pixel_width;
@@ -11,7 +11,8 @@ struct fractal_params {
 	double max_im;
 	double x_step;
 	double y_step;
-	double padding;
+	int max_iterations;
+	int padding;
 };
 
 /* wait for dma transfer to be finished */
@@ -22,16 +23,16 @@ static void wait_for_completion(int tag) {
 
 int main(uint64_t dest_addr, uint64_t param_addr, uint64_t arg3, uint64_t arg4)
 {
-	struct fractal_params params;
+	static struct fractal_params params __attribute__((aligned(128)));
 	int tag = 1;
 	mfc_get(&params, (uint32_t) param_addr, sizeof(struct fractal_params), tag, 0, 0);
 	wait_for_completion(tag);
 
 	int result[params.pixel_width * params.pixel_height];
-	calculate_fractal(result, params.pixel_width, params.pixel_height, params.min_re, params.max_im, params.x_step, params.y_step);
+	calculate_fractal(result, params.pixel_width, params.pixel_height, params.max_iterations, params.min_re, params.max_im, params.x_step, params.y_step);
 
 	int transfer_size = sizeof(int) * params.pixel_width * params.pixel_height;
-	transfer_size = transfer_size + (transfer_size%16); // need to dma transfer full blocks of 16 bytes
+	transfer_size = transfer_size + (transfer_size % 16); // need to dma transfer full blocks of 16 bytes
 	mfc_put(result, (uint32_t) dest_addr, transfer_size, tag, 0, 0);
 	wait_for_completion(tag);
 
@@ -40,9 +41,7 @@ int main(uint64_t dest_addr, uint64_t param_addr, uint64_t arg3, uint64_t arg4)
 }
 
 // TODO: Share code with PPU side instead.
-// TODO: Get number of iterations as parameter.
-const unsigned int MAX_ITERATIONS = 256;
-unsigned int calculate(double c_re, double c_im)
+unsigned int calculate(double c_re, double c_im, int max_iterations)
 {
 	double z_re, z_im;
 	z_re = z_im = 0;
@@ -51,7 +50,7 @@ unsigned int calculate(double c_re, double c_im)
 
 	// Stop when we maximum number of iterations is reached (part of Mandel set)
 	// or when we're certain that the iteration is going to reach infinity.
-	for (iterations = 0; iterations < MAX_ITERATIONS && !infinity; iterations++) {
+	for (iterations = 0; iterations < max_iterations && !infinity; iterations++) {
 		// z = z*z + c;
 		double new_z_re, new_z_im;
 		new_z_re = ((z_re*z_re) - (z_im*z_im) + c_re);
@@ -73,7 +72,7 @@ unsigned int calculate(double c_re, double c_im)
 		return iterations;
 }
 
-void calculate_fractal(int *result, int pixel_width, int pixel_height, double min_re, double max_im, double x_step, double y_step)
+void calculate_fractal(int *result, int pixel_width, int pixel_height, int max_iterations, double min_re, double max_im, double x_step, double y_step)
 {
 	double re;
 	double im = max_im;
@@ -89,7 +88,7 @@ void calculate_fractal(int *result, int pixel_width, int pixel_height, double mi
 			if (x > 0)
 				re += x_step;
 
-			unsigned int iterations = calculate(re, im);
+			unsigned int iterations = calculate(re, im, max_iterations);
 
 			if ( iterations != 0)
 				result[y*pixel_width+x] = iterations;

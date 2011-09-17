@@ -4,6 +4,7 @@
 
 const int WIDTH = 20;
 const int HEIGHT = 20;
+const unsigned int MAX_ITERATIONS = 256;
 
 void calculate_with_spu(int *result, int pixel_width, int pixel_height, double min_re, double max_im, double x_step, double y_step);
 void calculate_fractal(int *result, int pixel_width, int pixel_height, double min_re, double max_im, double x_step, double y_step);
@@ -48,17 +49,19 @@ struct fractal_params {
 	double max_im;
 	double x_step;
 	double y_step;
-	double padding;
+	int max_iterations;
+	int padding;
 };
 
 void calculate_with_spu(int *result, int pixel_width, int pixel_height, double min_re, double max_im, double x_step, double y_step) {
-	static struct fractal_params params __attribute__((aligned(16)));
+	static struct fractal_params params __attribute__((aligned(128)));
 	params.pixel_width = pixel_width;
 	params.pixel_height = pixel_height;
 	params.min_re = min_re;
 	params.max_im = max_im;
 	params.x_step = x_step;
 	params.y_step = y_step;
+	params.max_iterations = MAX_ITERATIONS;
 
 	for (int i=0; i<HEIGHT*WIDTH; i++)
 		result[i] = 1;
@@ -111,7 +114,6 @@ void print_values(int *result) {
 	}
 }
 
-const unsigned int MAX_ITERATIONS = 256;
 unsigned int calculate(double c_re, double c_im)
 {
 	double z_re, z_im;
