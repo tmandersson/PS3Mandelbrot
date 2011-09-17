@@ -1,23 +1,13 @@
 #include <stdio.h>
 #include <sys/spu.h>
 #include "spu_bin.h"
+#include <core/fractal_params.h>
 
 const int WIDTH = 20;
 const int HEIGHT = 20;
 const unsigned int MAX_ITERATIONS = 256;
 
 #define ptr2ea(x)			((u64)((void*)(x)))
-
-struct fractal_params {
-	int pixel_width;
-	int pixel_height;
-	double min_re;
-	double max_im;
-	double x_step;
-	double y_step;
-	unsigned int max_iterations;
-	int padding;
-};
 
 void calculate_with_spu(int *result, struct fractal_params *params);
 void calculate_fractal(int *result, struct fractal_params *params);
