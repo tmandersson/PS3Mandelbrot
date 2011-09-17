@@ -1,14 +1,11 @@
 #include <stdio.h>
-
-#ifdef __powerpc64__
 #include <sys/spu.h>
 #include "spu_bin.h"
-void calculate_with_spu(int *result, int pixel_width, int pixel_height, double min_re, double max_im, double x_step, double y_step);
-#endif
 
 const int WIDTH = 20;
 const int HEIGHT = 20;
 
+void calculate_with_spu(int *result, int pixel_width, int pixel_height, double min_re, double max_im, double x_step, double y_step);
 void calculate_fractal(int *result, int pixel_width, int pixel_height, double min_re, double max_im, double x_step, double y_step);
 void print_values(int *result);
 
@@ -34,19 +31,14 @@ int main(int argc, char* argv[]) {
 	print_values(result);
 
 	printf("\n\nSPU CODE:\n");
-#ifdef __powerpc64__
 	int spu_result[HEIGHT*WIDTH];
 	calculate_with_spu(spu_result, WIDTH, HEIGHT, min_re, max_im, x_step, y_step);
 	print_values(spu_result);
-#else
-	printf("Not implemented in linux version.\n");
-#endif
 
 	printf("\n\nExiting!\n");
 	return 0;
 }
 
-#ifdef __powerpc64__
 #define ptr2ea(x)			((u64)((void*)(x)))
 
 struct fractal_params {
@@ -104,7 +96,6 @@ void calculate_with_spu(int *result, int pixel_width, int pixel_height, double m
 	sysSpuImageClose(&image);
 	free(result_buffer);
 }
-#endif
 
 void print_values(int *result) {
 	for (int y=0; y<HEIGHT; y++) {

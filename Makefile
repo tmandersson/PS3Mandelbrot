@@ -51,7 +51,7 @@ vpath %.h include include/core include/ps3 include/linux
 
 .PHONY: spu.bin
 
-all: spu.bin.o sdl_mandel ps3 spu_linux_test
+all: spu.bin.o sdl_mandel ps3
 ps3: spu.bin.o mandel.self mandel.pkg spu_test.self spu_test.pkg
 run:
 	ps3load mandel.self
@@ -83,9 +83,6 @@ spu.bin:
 	
 sdl_mandel: sdl_main.lo mandel.lo sdlplotter.lo palette.lo
 	$(CC) $(CPPFLAGS) -o $@ $^ `sdl-config --libs` -pg
-	
-spu_linux_test: spu_test_main.lo
-	$(CC) $(CPPFLAGS) -o $@ $^
 
 %.lo: %.cpp %.h
 	$(CC) $(CPPFLAGS) -o $@ -c $< -pg
