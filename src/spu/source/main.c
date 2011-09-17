@@ -14,10 +14,18 @@ struct fractal_params {
 	double padding;
 };
 
+/* wait for dma transfer to be finished */
+static void wait_for_completion(int tag) {
+	mfc_write_tag_mask(1<<tag);
+	spu_mfcstat(MFC_TAG_UPDATE_ALL);
+}
+
 int main(uint64_t dest_addr, uint64_t param_addr, uint64_t arg3, uint64_t arg4)
 {
 	struct fractal_params params;
-	mfc_get(&params, (uint32_t) param_addr, sizeof(struct fractal_params), 0, 0, 0);
+	int tag = 1;
+	mfc_get(&params, (uint32_t) param_addr, sizeof(struct fractal_params), tag, 0, 0);
+	wait_for_completion(tag);
 
 	int pixel_width = 20;
 	int pixel_height = 20;
@@ -42,7 +50,9 @@ int main(uint64_t dest_addr, uint64_t param_addr, uint64_t arg3, uint64_t arg4)
 
 	int transfer_size = sizeof(int) * pixel_width * pixel_height;
 	transfer_size = transfer_size + (transfer_size%16); // need to dma transfer full blocks of 16 bytes
-	mfc_put(result, (uint32_t) dest_addr, transfer_size, 0, 0, 0);
+	tag = 1;
+	mfc_put(result, (uint32_t) dest_addr, transfer_size, tag, 0, 0);
+	wait_for_completion(tag);
 
 	spu_thread_exit(0);
 	return 0;
