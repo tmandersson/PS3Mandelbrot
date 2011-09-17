@@ -27,30 +27,11 @@ int main(uint64_t dest_addr, uint64_t param_addr, uint64_t arg3, uint64_t arg4)
 	mfc_get(&params, (uint32_t) param_addr, sizeof(struct fractal_params), tag, 0, 0);
 	wait_for_completion(tag);
 
-	int pixel_width = 20;
-	int pixel_height = 20;
+	int result[params.pixel_width * params.pixel_height];
+	calculate_fractal(result, params.pixel_width, params.pixel_height, params.min_re, params.max_im, params.x_step, params.y_step);
 
-	double start_real = -0.743643887037158704752191506114774;
-	double start_imag = 0.131825904205311970493132056385139;
-	double x_aspect = 1;
-	double y_aspect = 1;
-	double offset_real = x_aspect * 1.2;
-	double offset_imag = y_aspect * 1.2;
-
-	double min_re, max_re, min_im, max_im;
-	min_re = start_real-offset_real;
-	max_re = start_real+offset_real;
-	min_im = start_imag-offset_imag;
-	max_im = start_imag+offset_imag;
-	double x_step = (max_re - min_re) / pixel_width;
-	double y_step = (max_im - min_im) / pixel_height;
-	int result[pixel_width*pixel_height];
-
-	calculate_fractal(result, pixel_width, pixel_height, min_re, max_im, x_step, y_step);
-
-	int transfer_size = sizeof(int) * pixel_width * pixel_height;
+	int transfer_size = sizeof(int) * params.pixel_width * params.pixel_height;
 	transfer_size = transfer_size + (transfer_size%16); // need to dma transfer full blocks of 16 bytes
-	tag = 1;
 	mfc_put(result, (uint32_t) dest_addr, transfer_size, tag, 0, 0);
 	wait_for_completion(tag);
 
