@@ -2,8 +2,6 @@
 #include <spu_mfcio.h>
 #include <sys/spu_thread.h>
 
-void calculate_fractal(int *result, int pixel_width, int pixel_height, int max_iterations, double min_re, double max_im, double x_step, double y_step);
-
 struct fractal_params {
 	int pixel_width;
 	int pixel_height;
@@ -11,9 +9,11 @@ struct fractal_params {
 	double max_im;
 	double x_step;
 	double y_step;
-	int max_iterations;
+	unsigned int max_iterations;
 	int padding;
 };
+
+void calculate_fractal(int *result, struct fractal_params *params);
 
 /* wait for dma transfer to be finished */
 static void wait_for_completion(int tag) {
@@ -29,7 +29,7 @@ int main(uint64_t dest_addr, uint64_t param_addr, uint64_t arg3, uint64_t arg4)
 	wait_for_completion(tag);
 
 	int result[params.pixel_width * params.pixel_height];
-	calculate_fractal(result, params.pixel_width, params.pixel_height, params.max_iterations, params.min_re, params.max_im, params.x_step, params.y_step);
+	calculate_fractal(result, &params);
 
 	int transfer_size = sizeof(int) * params.pixel_width * params.pixel_height;
 	transfer_size = transfer_size + (transfer_size % 16); // need to dma transfer full blocks of 16 bytes
@@ -41,7 +41,7 @@ int main(uint64_t dest_addr, uint64_t param_addr, uint64_t arg3, uint64_t arg4)
 }
 
 // TODO: Share code with PPU side instead.
-unsigned int calculate(double c_re, double c_im, int max_iterations)
+unsigned int calculate(double c_re, double c_im, unsigned int max_iterations)
 {
 	double z_re, z_im;
 	z_re = z_im = 0;
@@ -72,28 +72,28 @@ unsigned int calculate(double c_re, double c_im, int max_iterations)
 		return iterations;
 }
 
-void calculate_fractal(int *result, int pixel_width, int pixel_height, int max_iterations, double min_re, double max_im, double x_step, double y_step)
+void calculate_fractal(int *result, struct fractal_params *params)
 {
 	double re;
-	double im = max_im;
+	double im = params->max_im;
 	int y;
-	for (y = 0; y < pixel_height; y++) {
+	for (y = 0; y < params->pixel_height; y++) {
 		if (y > 0) {
-			im -= y_step;
+			im -= params->y_step;
 		}
-		re = min_re; // start with the first pixel on the row
+		re = params->min_re; // start with the first pixel on the row
 
 		int x;
-		for (x = 0; x < pixel_width; x++) {
+		for (x = 0; x < params->pixel_width; x++) {
 			if (x > 0)
-				re += x_step;
+				re += params->x_step;
 
-			unsigned int iterations = calculate(re, im, max_iterations);
+			unsigned int iterations = calculate(re, im, params->max_iterations);
 
 			if ( iterations != 0)
-				result[y*pixel_width+x] = iterations;
+				result[y*params->pixel_width+x] = iterations;
 			else
-				result[y*pixel_width+x] = 0;
+				result[y*params->pixel_width+x] = 0;
 		}
 	}
 }

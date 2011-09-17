@@ -6,8 +6,8 @@ const int WIDTH = 20;
 const int HEIGHT = 20;
 const unsigned int MAX_ITERATIONS = 256;
 
-void calculate_with_spu(int *result, int pixel_width, int pixel_height, double min_re, double max_im, double x_step, double y_step);
-void calculate_fractal(int *result, int pixel_width, int pixel_height, double min_re, double max_im, double x_step, double y_step);
+void calculate_with_spu(int *result, int pixel_width, int pixel_height, unsigned int max_iterations, double min_re, double max_im, double x_step, double y_step);
+void calculate_fractal(int *result, int pixel_width, int pixel_height, unsigned int max_iterations, double min_re, double max_im, double x_step, double y_step);
 void print_values(int *result);
 
 int main(int argc, char* argv[]) {
@@ -28,12 +28,12 @@ int main(int argc, char* argv[]) {
 	double x_step = (max_re - min_re) / WIDTH;
 	double y_step = (max_im - min_im) / HEIGHT;
 	int result[HEIGHT*WIDTH];
-	calculate_fractal(result, WIDTH, HEIGHT, min_re, max_im, x_step, y_step);
+	calculate_fractal(result, WIDTH, HEIGHT, MAX_ITERATIONS, min_re, max_im, x_step, y_step);
 	print_values(result);
 
 	printf("\n\nSPU CODE:\n");
 	int spu_result[HEIGHT*WIDTH];
-	calculate_with_spu(spu_result, WIDTH, HEIGHT, min_re, max_im, x_step, y_step);
+	calculate_with_spu(spu_result, WIDTH, HEIGHT, MAX_ITERATIONS, min_re, max_im, x_step, y_step);
 	print_values(spu_result);
 
 	printf("\n\nExiting!\n");
@@ -49,11 +49,11 @@ struct fractal_params {
 	double max_im;
 	double x_step;
 	double y_step;
-	int max_iterations;
+	unsigned int max_iterations;
 	int padding;
 };
 
-void calculate_with_spu(int *result, int pixel_width, int pixel_height, double min_re, double max_im, double x_step, double y_step) {
+void calculate_with_spu(int *result, int pixel_width, int pixel_height, unsigned int max_iterations, double min_re, double max_im, double x_step, double y_step) {
 	static struct fractal_params params __attribute__((aligned(128)));
 	params.pixel_width = pixel_width;
 	params.pixel_height = pixel_height;
@@ -61,7 +61,7 @@ void calculate_with_spu(int *result, int pixel_width, int pixel_height, double m
 	params.max_im = max_im;
 	params.x_step = x_step;
 	params.y_step = y_step;
-	params.max_iterations = MAX_ITERATIONS;
+	params.max_iterations = max_iterations;
 
 	for (int i=0; i<HEIGHT*WIDTH; i++)
 		result[i] = 1;
@@ -114,7 +114,7 @@ void print_values(int *result) {
 	}
 }
 
-unsigned int calculate(double c_re, double c_im)
+unsigned int calculate(double c_re, double c_im, unsigned int max_iterations)
 {
 	double z_re, z_im;
 	z_re = z_im = 0;
@@ -123,7 +123,7 @@ unsigned int calculate(double c_re, double c_im)
 
 	// Stop when we maximum number of iterations is reached (part of Mandel set)
 	// or when we're certain that the iteration is going to reach infinity.
-	for (iterations = 0; iterations < MAX_ITERATIONS && !infinity; iterations++) {
+	for (iterations = 0; iterations < max_iterations && !infinity; iterations++) {
 		// z = z*z + c;
 		double new_z_re, new_z_im;
 		new_z_re = ((z_re*z_re) - (z_im*z_im) + c_re);
@@ -145,7 +145,7 @@ unsigned int calculate(double c_re, double c_im)
 		return iterations;
 }
 
-void calculate_fractal(int *result, int pixel_width, int pixel_height, double min_re, double max_im, double x_step, double y_step) {
+void calculate_fractal(int *result, int pixel_width, int pixel_height, unsigned int max_iterations, double min_re, double max_im, double x_step, double y_step) {
 	double re;
 	double im = max_im;
 	for (int y = 0; y < pixel_height; y++) {
@@ -158,7 +158,7 @@ void calculate_fractal(int *result, int pixel_width, int pixel_height, double mi
 			if (x > 0)
 				re += x_step;
 
-			unsigned int iterations = calculate(re, im);
+			unsigned int iterations = calculate(re, im, max_iterations);
 
 			if ( iterations != 0)
 				result[y*pixel_width+x] = iterations;
