@@ -88,6 +88,23 @@ int main(int argc, char* argv[]) {
 	}
 	print_values(spu_result2);
 
+	// fractal with memory size > 16 kb will not work with current spu code
+	printf("\n\nSPU CODE with bigger fractal:\n");
+	int height = 64;
+	int width = 64;
+	x_step = (max_re - min_re) / width;
+	y_step = (max_im - min_im) / height;
+	params.pixel_width = width;
+	params.pixel_height = height;
+	params.min_re = min_re;
+	params.max_im = max_im;
+	params.x_step = x_step;
+	params.y_step = y_step;
+	params.max_iterations = MAX_ITERATIONS;
+	int spu_result_bigger[height*width];
+	calculate_with_spu(spu_result_bigger, &params);
+	printf("Calculated %i number of pixels...", height*width);
+
 	printf("\n\nExiting!\n");
 	return 0;
 }
