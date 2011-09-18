@@ -11,6 +11,7 @@ const unsigned int MAX_ITERATIONS = 256;
 
 void calculate_with_spu(int *result, struct fractal_params *params);
 void calculate_fractal(int *result, struct fractal_params *params);
+void print_values_wh(int *result, int width, int height);
 void print_values(int *result);
 
 int main(int argc, char* argv[]) {
@@ -88,10 +89,9 @@ int main(int argc, char* argv[]) {
 	}
 	print_values(spu_result2);
 
-	// fractal with memory size > 16 kb will not work with current spu code
 	printf("\n\nSPU CODE with bigger fractal:\n");
-	int height = 64;
-	int width = 64;
+	int height = 65;
+	int width = 65;
 	x_step = (max_re - min_re) / width;
 	y_step = (max_im - min_im) / height;
 	params.pixel_width = width;
@@ -104,6 +104,7 @@ int main(int argc, char* argv[]) {
 	int spu_result_bigger[height*width];
 	calculate_with_spu(spu_result_bigger, &params);
 	printf("Calculated %i number of pixels...", height*width);
+	print_values_wh(spu_result_bigger, width, height);
 
 	printf("\n\nExiting!\n");
 	return 0;
@@ -114,7 +115,10 @@ void calculate_with_spu(int *result, struct fractal_params *params) {
 		result[i] = 1;
 
 	int size = sizeof(int) * params->pixel_width * params->pixel_height;
-	size = size + (size%16); // need to dma transfer full blocks of 16 bytes
+	if (size > 16*1024)
+		size += size % (16*1024); // need to dma transfer full blocks of 16 kb
+	else
+		size += size % 16; // need to dma transfer full blocks of 16 bytes
 	void *result_buffer = malloc(size);
 
 	sysSpuImage image;
@@ -147,18 +151,22 @@ void calculate_with_spu(int *result, struct fractal_params *params) {
 	free(result_buffer);
 }
 
-void print_values(int *result) {
-	for (int y=0; y<HEIGHT; y++) {
-		for (int x=0; x<WIDTH; x++)
+void print_values_wh(int *result, int width, int height) {
+	for (int y=0; y<height; y++) {
+		for (int x=0; x<width; x++)
 		{
-			int value = result[(y*WIDTH)+x];
+			int value = result[(y*width)+x];
 			if (value == 0)
 				printf("    ");
 			else
-				printf("%.3Xh", result[(y*WIDTH)+x]);
+				printf("%.3Xh", result[(y*width)+x]);
 		}
 		printf("\n");
 	}
+}
+
+void print_values(int *result) {
+	print_values_wh(result, WIDTH, HEIGHT);
 }
 
 unsigned int calculate(double c_re, double c_im, unsigned int max_iterations)

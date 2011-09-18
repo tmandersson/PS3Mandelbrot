@@ -22,8 +22,19 @@ int main(uint64_t dest_addr, uint64_t param_addr, uint64_t arg3, uint64_t arg4)
 	calculate_fractal(result, &params);
 
 	int transfer_size = sizeof(int) * params.pixel_width * params.pixel_height;
-	transfer_size = transfer_size + (transfer_size % 16); // need to dma transfer full blocks of 16 bytes
-	mfc_put(result, (uint32_t) dest_addr, transfer_size, tag, 0, 0);
+	int max_chunk = 16*1024;
+	int offset = 0;
+	if (transfer_size > max_chunk) { // need to dma transfer full 16kb chunks
+		while (transfer_size > 0) {
+			mfc_put(&result[offset], (uint32_t) dest_addr + offset, max_chunk, tag, 0, 0);
+			transfer_size -= max_chunk;
+			offset += max_chunk/sizeof(int);
+		}
+	}
+	else {
+		transfer_size += transfer_size % 16; // need to dma transfer full blocks of 16 bytes
+		mfc_put(&result[offset], (uint32_t) dest_addr + offset, transfer_size, tag, 0, 0);
+	}
 	wait_for_completion(tag);
 
 	spu_thread_exit(0);
