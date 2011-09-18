@@ -49,12 +49,31 @@ int main(int argc, char* argv[]) {
 	calculate_with_spu(spu_result, &params);
 	print_values(spu_result);
 
+	printf("\n\nSPU CODE in 2 passes:\n");
+	int spu_result2[HEIGHT*WIDTH];
+	int chunk_size = HEIGHT/2;
+	params.pixel_height = chunk_size;
+	int offset;
+
+	for (int i=0; i<HEIGHT*WIDTH; i++)
+		spu_result2[i] = 1;
+
+	offset = chunk_size * 0;
+	params.max_im -= (y_step * offset);
+	calculate_with_spu(&spu_result2[offset*params.pixel_width], &params);
+
+	offset = chunk_size * 1;
+	params.max_im -= (y_step * offset);
+	calculate_with_spu(&spu_result2[offset*params.pixel_width], &params);
+
+	print_values(spu_result2);
+
 	printf("\n\nExiting!\n");
 	return 0;
 }
 
 void calculate_with_spu(int *result, struct fractal_params *params) {
-	for (int i=0; i<HEIGHT*WIDTH; i++)
+	for (int i=0; i<params->pixel_height*params->pixel_width; i++)
 		result[i] = 1;
 
 	int size = sizeof(int) * params->pixel_width * params->pixel_height;
@@ -83,7 +102,7 @@ void calculate_with_spu(int *result, struct fractal_params *params) {
 	sysSpuThreadGroupJoin(group_id, &cause, &status);
 
 	int *p = (int *) result_buffer;
-	for (int i=0; i<HEIGHT*WIDTH; i++)
+	for (int i=0; i<params->pixel_width*params->pixel_height; i++)
 			result[i] = (int) *(p+i);
 
 	sysSpuThreadGroupDestroy(group_id);
