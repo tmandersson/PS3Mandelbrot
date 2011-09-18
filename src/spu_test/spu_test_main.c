@@ -55,9 +55,6 @@ int main(int argc, char* argv[]) {
 	params.pixel_height = chunk_size;
 	int offset;
 
-	for (int i=0; i<HEIGHT*WIDTH; i++)
-		spu_result2[i] = 1;
-
 	offset = chunk_size * 0;
 	params.max_im -= (y_step * offset);
 	calculate_with_spu(&spu_result2[offset*params.pixel_width], &params);
@@ -65,7 +62,30 @@ int main(int argc, char* argv[]) {
 	offset = chunk_size * 1;
 	params.max_im -= (y_step * offset);
 	calculate_with_spu(&spu_result2[offset*params.pixel_width], &params);
+	print_values(spu_result2);
 
+	printf("\n\nSPU CODE in n passes:\n");
+	printf("\n\nfor n = 4\n");
+	int n = 4;
+	chunk_size = HEIGHT/n;
+	params.pixel_height = chunk_size;
+	for (int chunk = 0; chunk<n; chunk++) {
+		offset = chunk_size * chunk;
+		params.max_im = max_im - y_step * offset;
+		calculate_with_spu(&spu_result2[offset*params.pixel_width], &params);
+	}
+	print_values(spu_result2);
+
+	printf("\n\nSPU CODE in n passes:\n");
+	printf("\n\nfor n = 5\n");
+	n = 5;
+	chunk_size = HEIGHT/n;
+	params.pixel_height = chunk_size;
+	for (int chunk = 0; chunk<n; chunk++) {
+		offset = chunk_size * chunk;
+		params.max_im = max_im - y_step * offset;
+		calculate_with_spu(&spu_result2[offset*params.pixel_width], &params);
+	}
 	print_values(spu_result2);
 
 	printf("\n\nExiting!\n");
