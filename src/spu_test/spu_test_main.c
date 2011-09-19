@@ -153,6 +153,7 @@ void calculate_with_spu(int *result, struct fractal_params *params) {
 
 void print_values_wh(int *result, int width, int height) {
 	for (int y=0; y<height; y++) {
+		printf("Line: %i\n", y);
 		for (int x=0; x<width; x++)
 		{
 			int value = result[(y*width)+x];
