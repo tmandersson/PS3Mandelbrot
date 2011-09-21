@@ -271,9 +271,11 @@ void show_fractal_on_screen(int *fractal, int fractal_width, int fractal_height)
 	waitFlip();
 
 	// plot fractal here
-	for (int x = 0; x<fractal_width; x++)
-		for (int y = 0; y<fractal_height; y++)
-			plotter.plot(x, y, 1);
+	for (int y = 0; y<fractal_height; y++)
+		for (int x = 0; x<fractal_width; x++) {
+			int value = fractal[(y*fractal_width)+x] == 0 ? 0 : 1;
+			plotter.plot(x, y, value);
+		}
 
 	flip(context, buffers[current_buffer].id);
 	waitFlip();
