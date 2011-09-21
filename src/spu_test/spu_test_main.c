@@ -90,8 +90,8 @@ int main(int argc, char* argv[]) {
 	print_values(spu_result2);
 
 	printf("\n\nSPU CODE with bigger fractal:\n");
-	int height = 250;
-	int width = 250;
+	int height = 255;
+	int width = 255;
 	x_step = (max_re - min_re) / width;
 	y_step = (max_im - min_im) / height;
 	params.pixel_width = width;

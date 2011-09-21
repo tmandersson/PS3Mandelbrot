@@ -18,27 +18,46 @@ int main(uint64_t dest_addr, uint64_t param_addr, uint64_t arg3, uint64_t arg4)
 	mfc_get(&params, (uint32_t) param_addr, sizeof(struct fractal_params), tag, 0, 0);
 	wait_for_completion(tag);
 
-	int transfer_size = sizeof(int) * params.pixel_width * params.pixel_height;
-	int max_chunk = 16*1024;
-	if (transfer_size > max_chunk)
-		transfer_size += transfer_size % max_chunk;
+	unsigned int dest_offset = 0;
+	unsigned int src_offset = 0;
 
-	int result[transfer_size/sizeof(int)];
-	calculate_fractal(result, &params);
+	// determine how many rows fit in 240kb (15*16*1024)
+	int rows = (240*1024) / (sizeof(int) * params.pixel_width);
+	int times = (params.pixel_height / rows);
+	if (params.pixel_height % rows != 0)
+		times++;
+	int pixel_remainder = params.pixel_height % times;
+	params.pixel_height /= times;
 
-	unsigned int offset = 0;
-	if (transfer_size > max_chunk) { // need to dma transfer full 16kb chunks
-		while (transfer_size > 0) {
-			mfc_put(&result[offset], (uint32_t) (dest_addr + (offset*sizeof(int))), max_chunk, tag, 0, 0);
-			transfer_size -= max_chunk;
-			offset += max_chunk/sizeof(int);
+	int i;
+	for (i=0; i<times; i++) {
+		if (i == (times-1))
+			params.pixel_height += pixel_remainder;
+
+		src_offset = 0;
+
+		int transfer_size = sizeof(int) * params.pixel_width * params.pixel_height;
+		int max_chunk = 16*1024;
+		if (transfer_size > max_chunk)
+			transfer_size += transfer_size % max_chunk;
+
+		int result[transfer_size/sizeof(int)];
+		calculate_fractal(result, &params);
+
+		if (transfer_size > max_chunk) { // need to dma transfer full 16kb chunks
+			while (transfer_size > 0) {
+				mfc_put(&result[src_offset], (uint32_t) (dest_addr + (dest_offset*sizeof(int))), max_chunk, tag, 0, 0);
+				transfer_size -= max_chunk;
+				dest_offset += max_chunk/sizeof(int);
+				src_offset += max_chunk/sizeof(int);
+			}
 		}
+		else {
+			transfer_size += transfer_size % 16; // need to dma transfer full blocks of 16 bytes
+			mfc_put(&result[src_offset], (uint32_t) (dest_addr + (dest_offset*sizeof(int))), transfer_size, tag, 0, 0);
+		}
+		wait_for_completion(tag);
 	}
-	else {
-		transfer_size += transfer_size % 16; // need to dma transfer full blocks of 16 bytes
-		mfc_put(&result[offset], (uint32_t) (dest_addr + (offset*sizeof(int))), transfer_size, tag, 0, 0);
-	}
-	wait_for_completion(tag);
 
 	spu_thread_exit(0);
 	return 0;
