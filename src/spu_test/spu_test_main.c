@@ -3,6 +3,16 @@
 #include "spu_bin.h"
 #include <core/fractal_params.h>
 
+#include <ppu-lv2.h>
+#include <malloc.h>
+#include <io/pad.h>
+#include <rsx/gcm_sys.h>
+#include <rsx/rsx.h>
+#include "ps3/rsxutil.h"
+#include "ps3/rsxplotter.h"
+#include <sys/process.h>
+SYS_PROCESS_PARAM(1001,0x100000);
+
 const int WIDTH = 20;
 const int HEIGHT = 20;
 const unsigned int MAX_ITERATIONS = 256;
@@ -13,6 +23,7 @@ void calculate_with_spu(int *result, struct fractal_params *params);
 void calculate_fractal(int *result, struct fractal_params *params);
 void print_values_wh(int *result, int width, int height);
 void print_values(int *result);
+void show_fractal_on_screen(int *result, int width, int height);
 
 int main(int argc, char* argv[]) {
 	printf("\nNON SPU CODE:\n");
@@ -105,6 +116,8 @@ int main(int argc, char* argv[]) {
 	calculate_with_spu(spu_result_bigger, &params);
 	printf("Calculated %i number of pixels...", height*width);
 	print_values_wh(spu_result_bigger, width, height);
+
+	show_fractal_on_screen(spu_result_bigger, width, height);
 
 	printf("\n\nExiting!\n");
 	return 0;
@@ -224,3 +237,67 @@ void calculate_fractal(int *result, struct fractal_params *params) {
 	}
 }
 
+#define MAX_BUFFERS 2
+
+void show_fractal_on_screen(int *fractal, int fractal_width, int fractal_height) {
+	gcmContextData *context;
+	void *host_addr = NULL;
+	rsxBuffer buffers[MAX_BUFFERS];
+	int current_buffer = 0;
+	padInfo padinfo;
+	padData paddata;
+	u16 width;
+	u16 height;
+	int i;
+
+	printf("Running Mandel video test!\n");
+
+	/* Allocate a 1Mb buffer, aligned to a 1Mb boundary
+	* to be our shared IO memory with the RSX. */
+	host_addr = memalign (1024*1024, HOST_SIZE);
+	context = initScreen (host_addr, HOST_SIZE);
+	ioPadInit(7);
+
+	getResolution(&width, &height);
+	for (i = 0; i < MAX_BUFFERS; i++)
+		makeBuffer( &buffers[i], width, height, i);
+
+	printf("Resolution: %i x %i\n", width, height);
+	printf("Video init done.\n");
+
+	flip(context, MAX_BUFFERS - 1);
+	Palette palette = Palette();
+	RSXPlotter plotter = RSXPlotter(&buffers[current_buffer], palette);
+	waitFlip();
+
+	// plot fractal here
+	for (int x = 0; x<fractal_width; x++)
+		for (int y = 0; y<fractal_height; y++)
+			plotter.plot(x, y, 1);
+
+	flip(context, buffers[current_buffer].id);
+	waitFlip();
+
+	while(1) {
+		// check for user input for exit
+		ioPadGetInfo(&padinfo);
+		for(i=0; i<MAX_PADS; i++) {
+			if(padinfo.status[i]) {
+				ioPadGetData(i, &paddata);
+
+				if(paddata.BTN_START)
+					goto end;
+			}
+		}
+	}
+
+	end:
+
+	gcmSetWaitFlip(context);
+	for (i = 0; i < MAX_BUFFERS; i++)
+		rsxFree(buffers[i].ptr);
+
+	rsxFinish(context, 1);
+	free(host_addr);
+	ioPadEnd();
+}
