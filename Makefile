@@ -61,7 +61,7 @@ run_test:
 mandel.self: mandel.elf
 mandel.elf: ps3_main.pso rsxutil.pso palette.pso rsxplotter.pso mandel.pso
 spu_test.self: spu_test.elf
-spu_test.elf: spu_test_main.pso spu.bin.o
+spu_test.elf: spu_test_main.pso rsxutil.pso rsxplotter.pso palette.pso spu.bin.o
 
 %.elf:
 	$(PS3_CC) $(PS3_CFLAGS) -o $@ $^ $(LIBS)
