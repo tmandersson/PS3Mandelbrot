@@ -11,7 +11,7 @@
 #include "ps3/rsxutil.h"
 #include "ps3/rsxplotter.h"
 #include <sys/process.h>
-SYS_PROCESS_PARAM(1001,0x100000);
+SYS_PROCESS_PARAM(1001,0x400000);
 
 const int WIDTH = 20;
 const int HEIGHT = 20;
@@ -101,8 +101,8 @@ int main(int argc, char* argv[]) {
 	print_values(spu_result2);
 
 	printf("\n\nSPU CODE with bigger fractal:\n");
-	int height = 255;
-	int width = 255;
+	int height = 250;
+	int width = 250;
 	x_step = (max_re - min_re) / width;
 	y_step = (max_im - min_im) / height;
 	params.pixel_width = width;
@@ -115,7 +115,7 @@ int main(int argc, char* argv[]) {
 	int spu_result_bigger[height*width];
 	calculate_with_spu(spu_result_bigger, &params);
 	printf("Calculated %i number of pixels...", height*width);
-	print_values_wh(spu_result_bigger, width, height);
+	//print_values_wh(spu_result_bigger, width, height);
 
 	show_fractal_on_screen(spu_result_bigger, width, height);
 
@@ -273,7 +273,8 @@ void show_fractal_on_screen(int *fractal, int fractal_width, int fractal_height)
 	// plot fractal here
 	for (int y = 0; y<fractal_height; y++)
 		for (int x = 0; x<fractal_width; x++) {
-			int value = fractal[(y*fractal_width)+x] == 0 ? 0 : 1;
+			int fractal_value = (int) fractal[(y*fractal_width)+x];
+			int value = fractal_value == 0 ? 0 : 1;
 			plotter.plot(x, y, value);
 		}
 
