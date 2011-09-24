@@ -6,10 +6,12 @@
 void calculate_fractal();
 void transfer_data(uint64_t dest_addr, int transfer_size, int dma_tag);
 
+// maximum data we can store/calculate
+const int max_calculation_size = 240*1024;
 // maximum data we can transfer with dma
-int max_chunk = 16*1024;
+const int max_transfer_size = 16*1024;
 
-/* wait for dma transfer to be finished */
+// wait for dma transfer to be finished
 static void wait_for_completion(int tag) {
 	mfc_write_tag_mask(1<<tag);
 	spu_mfcstat(MFC_TAG_UPDATE_ALL);
@@ -25,9 +27,6 @@ int main(uint64_t dest_addr, uint64_t param_addr, uint64_t arg3, uint64_t arg4)
 	wait_for_completion(tag);
 
 	int transfer_size = sizeof(int) * params.pixel_width * params.pixel_height;
-	if (transfer_size > max_chunk)
-		transfer_size += transfer_size % max_chunk;
-
 	calculate_fractal();
 	transfer_data(dest_addr, transfer_size, tag);
 
@@ -36,12 +35,15 @@ int main(uint64_t dest_addr, uint64_t param_addr, uint64_t arg3, uint64_t arg4)
 }
 
 void transfer_data(uint64_t dest_addr, int transfer_size, int dma_tag) {
+	if (transfer_size > max_transfer_size)
+		transfer_size += transfer_size % max_transfer_size;
+
 	unsigned int offset = 0;
-	if (transfer_size > max_chunk) { // need to dma transfer full 16kb chunks
+	if (transfer_size > max_transfer_size) { // need to dma transfer full 16kb chunks
 		while (transfer_size > 0) {
-			mfc_put(&result[offset], (uint32_t) (dest_addr + (offset*sizeof(int))), max_chunk, dma_tag, 0, 0);
-			transfer_size -= max_chunk;
-			offset += max_chunk/sizeof(int);
+			mfc_put(&result[offset], (uint32_t) (dest_addr + (offset*sizeof(int))), max_transfer_size, dma_tag, 0, 0);
+			transfer_size -= max_transfer_size;
+			offset += max_transfer_size/sizeof(int);
 		}
 	}
 	else {
