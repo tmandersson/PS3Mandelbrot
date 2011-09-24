@@ -134,6 +134,10 @@ void calculate_with_spu(int *result, struct fractal_params *params) {
 		size += size % 16; // need to dma transfer full blocks of 16 bytes
 	void *result_buffer = malloc(size);
 
+	int *p = (int *) result_buffer;
+	for (int i=0; i<params->pixel_width*params->pixel_height; i++)
+		result[i] = 0;
+
 	sysSpuImage image;
 	u32 group_id, thread_id;
 	u32 cause, status;
@@ -155,7 +159,7 @@ void calculate_with_spu(int *result, struct fractal_params *params) {
 	sysSpuThreadGroupStart(group_id);
 	sysSpuThreadGroupJoin(group_id, &cause, &status);
 
-	int *p = (int *) result_buffer;
+	p = (int *) result_buffer;
 	for (int i=0; i<params->pixel_width*params->pixel_height; i++)
 			result[i] = (int) *(p+i);
 

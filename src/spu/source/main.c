@@ -3,7 +3,11 @@
 #include <sys/spu_thread.h>
 #include <core/fractal_params.h>
 
-void calculate_fractal(int *result, struct fractal_params *params);
+void calculate_fractal();
+void transfer_data(uint64_t dest_addr, int transfer_size, int dma_tag);
+
+// maximum data we can transfer with dma
+int max_chunk = 16*1024;
 
 /* wait for dma transfer to be finished */
 static void wait_for_completion(int tag) {
@@ -11,37 +15,40 @@ static void wait_for_completion(int tag) {
 	spu_mfcstat(MFC_TAG_UPDATE_ALL);
 }
 
+int result[(240*1024)/sizeof(int)]; // 240 kb result buffer
+static struct fractal_params params __attribute__((aligned(128)));
+
 int main(uint64_t dest_addr, uint64_t param_addr, uint64_t arg3, uint64_t arg4)
 {
-	static struct fractal_params params __attribute__((aligned(128)));
 	int tag = 1;
 	mfc_get(&params, (uint32_t) param_addr, sizeof(struct fractal_params), tag, 0, 0);
 	wait_for_completion(tag);
 
 	int transfer_size = sizeof(int) * params.pixel_width * params.pixel_height;
-	int max_chunk = 16*1024;
 	if (transfer_size > max_chunk)
 		transfer_size += transfer_size % max_chunk;
 
-	int result[transfer_size/sizeof(int)];
-	calculate_fractal(result, &params);
+	calculate_fractal();
+	transfer_data(dest_addr, transfer_size, tag);
 
+	spu_thread_exit(0);
+	return 0;
+}
+
+void transfer_data(uint64_t dest_addr, int transfer_size, int dma_tag) {
 	unsigned int offset = 0;
 	if (transfer_size > max_chunk) { // need to dma transfer full 16kb chunks
 		while (transfer_size > 0) {
-			mfc_put(&result[offset], (uint32_t) (dest_addr + (offset*sizeof(int))), max_chunk, tag, 0, 0);
+			mfc_put(&result[offset], (uint32_t) (dest_addr + (offset*sizeof(int))), max_chunk, dma_tag, 0, 0);
 			transfer_size -= max_chunk;
 			offset += max_chunk/sizeof(int);
 		}
 	}
 	else {
 		transfer_size += transfer_size % 16; // need to dma transfer full blocks of 16 bytes
-		mfc_put(&result[offset], (uint32_t) (dest_addr + (offset*sizeof(int))), transfer_size, tag, 0, 0);
+		mfc_put(&result[offset], (uint32_t) (dest_addr + (offset*sizeof(int))), transfer_size, dma_tag, 0, 0);
 	}
-	wait_for_completion(tag);
-
-	spu_thread_exit(0);
-	return 0;
+	wait_for_completion(dma_tag);
 }
 
 // TODO: Share code with PPU side instead.
@@ -76,28 +83,28 @@ unsigned int calculate(double c_re, double c_im, unsigned int max_iterations)
 		return iterations;
 }
 
-void calculate_fractal(int *result, struct fractal_params *params)
+void calculate_fractal()
 {
 	double re;
-	double im = params->max_im;
+	double im = params.max_im;
 	int y;
-	for (y = 0; y < params->pixel_height; y++) {
+	for (y = 0; y < params.pixel_height; y++) {
 		if (y > 0) {
-			im -= params->y_step;
+			im -= params.y_step;
 		}
-		re = params->min_re; // start with the first pixel on the row
+		re = params.min_re; // start with the first pixel on the row
 
 		int x;
-		for (x = 0; x < params->pixel_width; x++) {
+		for (x = 0; x < params.pixel_width; x++) {
 			if (x > 0)
-				re += params->x_step;
+				re += params.x_step;
 
-			unsigned int iterations = calculate(re, im, params->max_iterations);
+			unsigned int iterations = calculate(re, im, params.max_iterations);
 
 			if ( iterations != 0)
-				result[y*params->pixel_width+x] = iterations;
+				result[y*params.pixel_width+x] = iterations;
 			else
-				result[y*params->pixel_width+x] = 0;
+				result[y*params.pixel_width+x] = 0;
 		}
 	}
 }
