@@ -119,7 +119,7 @@ void calculate_fractal()
 			if (transfer_size == max_calculation_size)
 			{
 				transfer_data();
-				destination += max_calculation_size;
+				destination += transfer_size;
 				transfer_size = 0;
 			}
 		}
