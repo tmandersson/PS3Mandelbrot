@@ -4,10 +4,10 @@
 #include <core/fractal_params.h>
 
 void calculate_fractal();
-void transfer_data(int dma_tag);
+void transfer_data();
 
 // maximum data we can store/calculate
-const int max_calculation_size = 240*1024;
+const int max_calculation_size = 112*1024;
 // maximum data we can transfer with dma
 const int max_transfer_size = 16*1024;
 
@@ -17,6 +17,8 @@ static void wait_for_completion(int tag) {
 	spu_mfcstat(MFC_TAG_UPDATE_ALL);
 }
 
+int dma_tag = 1;
+
 static struct fractal_params params __attribute__((aligned(128)));
 
 int result[(240*1024)/sizeof(int)]; // 240 kb result buffer
@@ -25,19 +27,21 @@ uint64_t destination;
 
 int main(uint64_t dest_addr, uint64_t param_addr, uint64_t arg3, uint64_t arg4)
 {
-	int tag = 1;
-	mfc_get(&params, (uint32_t) param_addr, sizeof(struct fractal_params), tag, 0, 0);
-	wait_for_completion(tag);
+	mfc_get(&params, (uint32_t) param_addr, sizeof(struct fractal_params), dma_tag, 0, 0);
+	wait_for_completion(dma_tag);
 
 	destination = dest_addr;
 	calculate_fractal();
-	transfer_data(tag);
+	transfer_data();
 
 	spu_thread_exit(0);
 	return 0;
 }
 
-void transfer_data(int dma_tag) {
+void transfer_data() {
+	if (transfer_size == 0)
+		return;
+
 	if (transfer_size > max_transfer_size)
 		transfer_size += transfer_size % max_transfer_size;
 
@@ -112,6 +116,12 @@ void calculate_fractal()
 				result[y*params.pixel_width+x] = 0;
 
 			transfer_size += sizeof(int);
+			if (transfer_size == max_calculation_size)
+			{
+				transfer_data();
+				destination += max_calculation_size;
+				transfer_size = 0;
+			}
 		}
 	}
 }
