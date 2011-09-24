@@ -4,7 +4,7 @@
 #include <core/fractal_params.h>
 
 void calculate_fractal();
-void transfer_data(uint64_t dest_addr, int transfer_size, int dma_tag);
+void transfer_data(int dma_tag);
 
 // maximum data we can store/calculate
 const int max_calculation_size = 240*1024;
@@ -17,8 +17,11 @@ static void wait_for_completion(int tag) {
 	spu_mfcstat(MFC_TAG_UPDATE_ALL);
 }
 
-int result[(240*1024)/sizeof(int)]; // 240 kb result buffer
 static struct fractal_params params __attribute__((aligned(128)));
+
+int result[(240*1024)/sizeof(int)]; // 240 kb result buffer
+int transfer_size = 0;
+uint64_t destination;
 
 int main(uint64_t dest_addr, uint64_t param_addr, uint64_t arg3, uint64_t arg4)
 {
@@ -26,29 +29,29 @@ int main(uint64_t dest_addr, uint64_t param_addr, uint64_t arg3, uint64_t arg4)
 	mfc_get(&params, (uint32_t) param_addr, sizeof(struct fractal_params), tag, 0, 0);
 	wait_for_completion(tag);
 
-	int transfer_size = sizeof(int) * params.pixel_width * params.pixel_height;
+	destination = dest_addr;
 	calculate_fractal();
-	transfer_data(dest_addr, transfer_size, tag);
+	transfer_data(tag);
 
 	spu_thread_exit(0);
 	return 0;
 }
 
-void transfer_data(uint64_t dest_addr, int transfer_size, int dma_tag) {
+void transfer_data(int dma_tag) {
 	if (transfer_size > max_transfer_size)
 		transfer_size += transfer_size % max_transfer_size;
 
 	unsigned int offset = 0;
 	if (transfer_size > max_transfer_size) { // need to dma transfer full 16kb chunks
 		while (transfer_size > 0) {
-			mfc_put(&result[offset], (uint32_t) (dest_addr + (offset*sizeof(int))), max_transfer_size, dma_tag, 0, 0);
+			mfc_put(&result[offset], (uint32_t) (destination + (offset*sizeof(int))), max_transfer_size, dma_tag, 0, 0);
 			transfer_size -= max_transfer_size;
 			offset += max_transfer_size/sizeof(int);
 		}
 	}
 	else {
 		transfer_size += transfer_size % 16; // need to dma transfer full blocks of 16 bytes
-		mfc_put(&result[offset], (uint32_t) (dest_addr + (offset*sizeof(int))), transfer_size, dma_tag, 0, 0);
+		mfc_put(&result[offset], (uint32_t) (destination + (offset*sizeof(int))), transfer_size, dma_tag, 0, 0);
 	}
 	wait_for_completion(dma_tag);
 }
@@ -107,6 +110,8 @@ void calculate_fractal()
 				result[y*params.pixel_width+x] = iterations;
 			else
 				result[y*params.pixel_width+x] = 0;
+
+			transfer_size += sizeof(int);
 		}
 	}
 }
