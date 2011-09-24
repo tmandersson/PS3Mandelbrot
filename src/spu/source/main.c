@@ -7,7 +7,7 @@ void calculate_fractal();
 void transfer_data();
 
 // maximum data we can store/calculate
-const int max_calculation_size = 112*1024;
+const int max_calculation_size = 240*1024;
 // maximum data we can transfer with dma
 const int max_transfer_size = 16*1024;
 
@@ -94,6 +94,7 @@ unsigned int calculate(double c_re, double c_im, unsigned int max_iterations)
 
 void calculate_fractal()
 {
+	unsigned long long offset = 0;
 	double re;
 	double im = params.max_im;
 	int y;
@@ -111,15 +112,16 @@ void calculate_fractal()
 			unsigned int iterations = calculate(re, im, params.max_iterations);
 
 			if ( iterations != 0)
-				result[y*params.pixel_width+x] = iterations;
+				result[y*params.pixel_width+x-offset] = iterations;
 			else
-				result[y*params.pixel_width+x] = 0;
+				result[y*params.pixel_width+x-offset] = 0;
 
 			transfer_size += sizeof(int);
 			if (transfer_size == max_calculation_size)
 			{
 				transfer_data();
-				destination += transfer_size;
+				destination += max_calculation_size;
+				offset += max_calculation_size/sizeof(int);
 				transfer_size = 0;
 			}
 		}
