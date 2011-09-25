@@ -19,7 +19,8 @@ const unsigned int MAX_ITERATIONS = 256;
 
 #define ptr2ea(x)			((u64)((void*)(x)))
 
-void calculate_with_spu(int *result, struct fractal_params *params);
+void *allocate_result_buffer(struct fractal_params *params);
+void calculate_with_spu(void *result, struct fractal_params *params);
 void calculate_fractal(int *result, struct fractal_params *params);
 void print_values_wh(int *result, int width, int height);
 void print_values(int *result);
@@ -56,6 +57,7 @@ int main(int argc, char* argv[]) {
 	calculate_fractal(result, &params);
 	print_values(result);
 
+	/*
 	printf("\n\nSPU CODE:\n");
 	int spu_result[HEIGHT*WIDTH];
 	calculate_with_spu(spu_result, &params);
@@ -99,10 +101,10 @@ int main(int argc, char* argv[]) {
 		calculate_with_spu(&spu_result2[offset*params.pixel_width], &params);
 	}
 	print_values(spu_result2);
-
+*/
 	printf("\n\nSPU CODE with bigger fractal:\n");
-	int height = 255;
-	int width = 255;
+	int width = 1920;
+	int height = 1080;
 	x_step = (max_re - min_re) / width;
 	y_step = (max_im - min_im) / height;
 	params.pixel_width = width;
@@ -112,21 +114,18 @@ int main(int argc, char* argv[]) {
 	params.x_step = x_step;
 	params.y_step = y_step;
 	params.max_iterations = MAX_ITERATIONS;
-	int spu_result_bigger[height*width];
-	calculate_with_spu(spu_result_bigger, &params);
-	printf("Calculated %i number of pixels...", height*width);
-	//print_values_wh(spu_result_bigger, width, height);
 
-	show_fractal_on_screen(spu_result_bigger, width, height);
+	void *big_result = allocate_result_buffer(&params);
+	calculate_with_spu(big_result, &params);
+	printf("Calculated %i number of pixels...", height*width);
+	show_fractal_on_screen((int *)big_result, width, height);
+	free(big_result);
 
 	printf("\n\nExiting!\n");
 	return 0;
 }
 
-void calculate_with_spu(int *result, struct fractal_params *params) {
-	for (int i=0; i<params->pixel_height*params->pixel_width; i++)
-		result[i] = 1;
-
+void *allocate_result_buffer(struct fractal_params *params) {
 	int size = sizeof(int) * params->pixel_width * params->pixel_height;
 	if (size % 16 > 0) // need to dma transfer full blocks of 16 bytes
 		size += 16 - size % 16;
@@ -134,8 +133,12 @@ void calculate_with_spu(int *result, struct fractal_params *params) {
 
 	int *p = (int *) result_buffer;
 	for (int i=0; i<params->pixel_width*params->pixel_height; i++)
-		result[i] = 0;
+		p[i] = 0;
 
+	return result_buffer;
+}
+
+void calculate_with_spu(void *result, struct fractal_params *params) {
 	sysSpuImage image;
 	u32 group_id, thread_id;
 	u32 cause, status;
@@ -150,20 +153,15 @@ void calculate_with_spu(int *result, struct fractal_params *params) {
 	sysSpuImageImport(&image, spu_bin, SPU_IMAGE_PROTECT);
 
 	int index_in_group = 0;
-	arg.arg0 = ptr2ea(result_buffer);
+	arg.arg0 = ptr2ea(result);
 	arg.arg1 = ptr2ea(params);
 	sysSpuThreadInitialize(&thread_id, group_id, index_in_group, &image, &attr, &arg);
 
 	sysSpuThreadGroupStart(group_id);
 	sysSpuThreadGroupJoin(group_id, &cause, &status);
 
-	p = (int *) result_buffer;
-	for (int i=0; i<params->pixel_width*params->pixel_height; i++)
-			result[i] = (int) *(p+i);
-
 	sysSpuThreadGroupDestroy(group_id);
 	sysSpuImageClose(&image);
-	free(result_buffer);
 }
 
 void print_values_wh(int *result, int width, int height) {
