@@ -101,8 +101,8 @@ int main(int argc, char* argv[]) {
 	print_values(spu_result2);
 
 	printf("\n\nSPU CODE with bigger fractal:\n");
-	int height = 256;
-	int width = 256;
+	int height = 255;
+	int width = 255;
 	x_step = (max_re - min_re) / width;
 	y_step = (max_im - min_im) / height;
 	params.pixel_width = width;
@@ -128,10 +128,8 @@ void calculate_with_spu(int *result, struct fractal_params *params) {
 		result[i] = 1;
 
 	int size = sizeof(int) * params->pixel_width * params->pixel_height;
-	if (size > 16*1024)
-		size += size % (16*1024); // need to dma transfer full blocks of 16 kb
-	else
-		size += size % 16; // need to dma transfer full blocks of 16 bytes
+	if (size % 16 > 0) // need to dma transfer full blocks of 16 bytes
+		size += 16 - size % 16;
 	void *result_buffer = malloc(size);
 
 	int *p = (int *) result_buffer;
