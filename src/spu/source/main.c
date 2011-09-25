@@ -42,23 +42,17 @@ void transfer_data() {
 	if (transfer_size == 0)
 		return;
 
-	// TODO: This should not be needed and is probably faulty anyway.
-	if (transfer_size > max_transfer_size)
-		transfer_size += transfer_size % max_transfer_size;
-
 	unsigned int offset = 0;
-	if (transfer_size > max_transfer_size) { // need to dma transfer full 16kb chunks
-		while (transfer_size > 0) {
-			mfc_put(&result[offset], (uint32_t) (destination + (offset*sizeof(int))), max_transfer_size, dma_tag, 0, 0);
-			transfer_size -= max_transfer_size;
-			offset += max_transfer_size/sizeof(int);
-		}
+	while (transfer_size > max_transfer_size) { // need to dma transfer full 16kb chunks
+		mfc_put(&result[offset], (uint32_t) (destination + (offset*sizeof(int))), max_transfer_size, dma_tag, 0, 0);
+		transfer_size -= max_transfer_size;
+		offset += max_transfer_size/sizeof(int);
 	}
-	else {
-		if (transfer_size % 16 > 0)
-			transfer_size += 16 - (transfer_size % 16); // need to dma transfer full blocks of 16 bytes
-		mfc_put(&result[offset], (uint32_t) (destination + (offset*sizeof(int))), transfer_size, dma_tag, 0, 0);
-	}
+
+	if (transfer_size % 16 > 0)
+		transfer_size += 16 - (transfer_size % 16); // need to dma transfer full blocks of 16 bytes
+	mfc_put(&result[offset], (uint32_t) (destination + (offset*sizeof(int))), transfer_size, dma_tag, 0, 0);
+
 	wait_for_completion(dma_tag);
 }
 
