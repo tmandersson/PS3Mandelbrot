@@ -122,7 +122,7 @@ void calculate_with_spus(void *result, struct fractal_params *params) {
 	params2.pixel_width = params->pixel_width;
 	params2.pixel_height = params->pixel_height/6;
 	params2.min_re = params->min_re;
-	params2.max_im = params->max_im;
+	params2.max_im = params->max_im - (params->y_step * params2.pixel_height);
 	params2.x_step = params->x_step;
 	params2.y_step = params->y_step;
 	params2.max_iterations = params->max_iterations;
