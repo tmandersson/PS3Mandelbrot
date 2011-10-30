@@ -99,7 +99,7 @@ struct thread_data {
 	struct fractal_params params __attribute__((aligned(128)));
 };
 
-const int thread_count = 2;
+const int thread_count = 6;
 
 void calculate_with_spus(void *result, struct fractal_params *params) {
 	static struct thread_data thread[thread_count];
@@ -110,21 +110,21 @@ void calculate_with_spus(void *result, struct fractal_params *params) {
 	sysSpuThreadGroupAttribute grpattr = { 7+1, ptr2ea("fractal"), 0, 0 };
 	sysSpuThreadAttribute attr = { ptr2ea("f_thread"), 8+1, SPU_THREAD_ATTR_NONE };
 
-	sysSpuInitialize(6, 0);
+	sysSpuInitialize(thread_count, 0);
 	sysSpuThreadGroupCreate(&group_id, thread_count, priority, &grpattr);
 	sysSpuImageImport(&image, spu_bin, SPU_IMAGE_PROTECT);
 
 	for(int index = 0; index < thread_count; index++) {
 		thread[index].params.pixel_width = params->pixel_width;
-		thread[index].params.pixel_height = params->pixel_height/6;
+		thread[index].params.pixel_height = params->pixel_height/thread_count;
 		thread[index].params.min_re = params->min_re;
 		thread[index].params.max_im = params->max_im - (params->y_step * thread[index].params.pixel_height * index);
 		thread[index].params.x_step = params->x_step;
 		thread[index].params.y_step = params->y_step;
 		thread[index].params.max_iterations = params->max_iterations;
 
-		result += ((params->pixel_height/6) * params->pixel_width) * sizeof(int) * index;
-		thread[index].arg.arg0 = ptr2ea(result);
+		void *thread_result = result + ((params->pixel_height/thread_count) * params->pixel_width) * sizeof(int) * index;
+		thread[index].arg.arg0 = ptr2ea(thread_result);
 		thread[index].arg.arg1 = ptr2ea(&thread[index].params);
 		thread[index].arg.arg2 = 0;
 		thread[index].arg.arg3 = 0;
