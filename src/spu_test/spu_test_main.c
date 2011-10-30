@@ -20,7 +20,6 @@ const unsigned int MAX_ITERATIONS = 256;
 #define ptr2ea(x)			((u64)((void*)(x)))
 
 void *allocate_result_buffer(struct fractal_params *params);
-void calculate_with_spu(void *result, struct fractal_params *params);
 void calculate_with_spus(void *result, struct fractal_params *params);
 void calculate_fractal(int *result, struct fractal_params *params);
 void print_values_wh(int *result, int width, int height);
@@ -92,32 +91,6 @@ void *allocate_result_buffer(struct fractal_params *params) {
 		p[i] = 0;
 
 	return result_buffer;
-}
-
-void calculate_with_spu(void *result, struct fractal_params *params) {
-	sysSpuImage image;
-	u32 group_id, thread_id;
-	u32 cause, status;
-	int thread_count = 1;
-	int priority = 100;
-	sysSpuThreadGroupAttribute grpattr = { 7+1, ptr2ea("fractal"), 0, 0 };
-	sysSpuThreadAttribute attr = { ptr2ea("f_thread"), 8+1, SPU_THREAD_ATTR_NONE };
-	sysSpuThreadArgument arg = { 0, 0, 0, 0 };
-
-	sysSpuInitialize(6, 0);
-	sysSpuThreadGroupCreate(&group_id, thread_count, priority, &grpattr);
-	sysSpuImageImport(&image, spu_bin, SPU_IMAGE_PROTECT);
-
-	int index_in_group = 0;
-	arg.arg0 = ptr2ea(result);
-	arg.arg1 = ptr2ea(params);
-	sysSpuThreadInitialize(&thread_id, group_id, index_in_group, &image, &attr, &arg);
-
-	sysSpuThreadGroupStart(group_id);
-	sysSpuThreadGroupJoin(group_id, &cause, &status);
-
-	sysSpuThreadGroupDestroy(group_id);
-	sysSpuImageClose(&image);
 }
 
 void calculate_with_spus(void *result, struct fractal_params *params) {
