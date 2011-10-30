@@ -114,37 +114,22 @@ void calculate_with_spus(void *result, struct fractal_params *params) {
 	sysSpuThreadGroupCreate(&group_id, thread_count, priority, &grpattr);
 	sysSpuImageImport(&image, spu_bin, SPU_IMAGE_PROTECT);
 
-	int index = 0;
-	thread[index].params.pixel_width = params->pixel_width;
-	thread[index].params.pixel_height = params->pixel_height/6;
-	thread[index].params.min_re = params->min_re;
-	thread[index].params.max_im = params->max_im - (params->y_step * thread[index].params.pixel_height * index);
-	thread[index].params.x_step = params->x_step;
-	thread[index].params.y_step = params->y_step;
-	thread[index].params.max_iterations = params->max_iterations;
+	for(int index = 0; index < thread_count; index++) {
+		thread[index].params.pixel_width = params->pixel_width;
+		thread[index].params.pixel_height = params->pixel_height/6;
+		thread[index].params.min_re = params->min_re;
+		thread[index].params.max_im = params->max_im - (params->y_step * thread[index].params.pixel_height * index);
+		thread[index].params.x_step = params->x_step;
+		thread[index].params.y_step = params->y_step;
+		thread[index].params.max_iterations = params->max_iterations;
 
-	result += ((params->pixel_height/6) * params->pixel_width) * sizeof(int) * index;
-	thread[index].arg.arg0 = ptr2ea(result);
-	thread[index].arg.arg1 = ptr2ea(&thread[index].params);
-	thread[index].arg.arg2 = 0;
-	thread[index].arg.arg3 = 0;
-	sysSpuThreadInitialize(&thread[index].id, group_id, index, &image, &attr, &thread[index].arg);
-
-	index = 1;
-	thread[index].params.pixel_width = params->pixel_width;
-	thread[index].params.pixel_height = params->pixel_height/6;
-	thread[index].params.min_re = params->min_re;
-	thread[index].params.max_im = params->max_im - (params->y_step * thread[index].params.pixel_height * index);
-	thread[index].params.x_step = params->x_step;
-	thread[index].params.y_step = params->y_step;
-	thread[index].params.max_iterations = params->max_iterations;
-
-	result += ((params->pixel_height/6) * params->pixel_width) * sizeof(int) * index;
-	thread[index].arg.arg0 = ptr2ea(result);
-	thread[index].arg.arg1 = ptr2ea(&thread[index].params);
-	thread[index].arg.arg2 = 0;
-	thread[index].arg.arg3 = 0;
-	sysSpuThreadInitialize(&thread[index].id, group_id, index, &image, &attr, &thread[index].arg);
+		result += ((params->pixel_height/6) * params->pixel_width) * sizeof(int) * index;
+		thread[index].arg.arg0 = ptr2ea(result);
+		thread[index].arg.arg1 = ptr2ea(&thread[index].params);
+		thread[index].arg.arg2 = 0;
+		thread[index].arg.arg3 = 0;
+		sysSpuThreadInitialize(&thread[index].id, group_id, index, &image, &attr, &thread[index].arg);
+	}
 
 	sysSpuThreadGroupStart(group_id);
 	sysSpuThreadGroupJoin(group_id, &cause, &status);
