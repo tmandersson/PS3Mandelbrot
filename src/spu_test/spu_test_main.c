@@ -93,11 +93,16 @@ void *allocate_result_buffer(struct fractal_params *params) {
 	return result_buffer;
 }
 
+struct thread_data {
+	u32 id;
+};
+
 void calculate_with_spus(void *result, struct fractal_params *params) {
-	sysSpuImage image;
-	u32 group_id, thread_id1, thread_id2;
-	u32 cause, status;
 	int thread_count = 2;
+	struct thread_data thread[thread_count];
+	sysSpuImage image;
+	u32 group_id;
+	u32 cause, status;
 	int priority = 100;
 	sysSpuThreadGroupAttribute grpattr = { 7+1, ptr2ea("fractal"), 0, 0 };
 	sysSpuThreadAttribute attr1 = { ptr2ea("f_threa1"), 8+1, SPU_THREAD_ATTR_NONE };
@@ -109,35 +114,35 @@ void calculate_with_spus(void *result, struct fractal_params *params) {
 	sysSpuThreadGroupCreate(&group_id, thread_count, priority, &grpattr);
 	sysSpuImageImport(&image, spu_bin, SPU_IMAGE_PROTECT);
 
-	int index_in_group = 0;
+	int index = 0;
 	static struct fractal_params params1 __attribute__((aligned(128)));
 	params1.pixel_width = params->pixel_width;
 	params1.pixel_height = params->pixel_height/6;
 	params1.min_re = params->min_re;
-	params1.max_im = params->max_im - (params->y_step * params1.pixel_height * index_in_group);
+	params1.max_im = params->max_im - (params->y_step * params1.pixel_height * index);
 	params1.x_step = params->x_step;
 	params1.y_step = params->y_step;
 	params1.max_iterations = params->max_iterations;
 
-	result += ((params->pixel_height/6) * params->pixel_width) * sizeof(int) * index_in_group;
+	result += ((params->pixel_height/6) * params->pixel_width) * sizeof(int) * index;
 	arg1.arg0 = ptr2ea(result);
 	arg1.arg1 = ptr2ea(&params1);
-	sysSpuThreadInitialize(&thread_id1, group_id, index_in_group, &image, &attr1, &arg1);
+	sysSpuThreadInitialize(&thread[index].id, group_id, index, &image, &attr1, &arg1);
 
-	index_in_group = 1;
+	index = 1;
 	static struct fractal_params params2 __attribute__((aligned(128)));
 	params2.pixel_width = params->pixel_width;
 	params2.pixel_height = params->pixel_height/6;
 	params2.min_re = params->min_re;
-	params2.max_im = params->max_im - (params->y_step * params2.pixel_height * index_in_group);
+	params2.max_im = params->max_im - (params->y_step * params2.pixel_height * index);
 	params2.x_step = params->x_step;
 	params2.y_step = params->y_step;
 	params2.max_iterations = params->max_iterations;
 
-	result += ((params->pixel_height/6) * params->pixel_width) * sizeof(int) * index_in_group;
+	result += ((params->pixel_height/6) * params->pixel_width) * sizeof(int) * index;
 	arg2.arg0 = ptr2ea(result);
 	arg2.arg1 = ptr2ea(&params2);
-	sysSpuThreadInitialize(&thread_id2, group_id, index_in_group, &image, &attr2, &arg2);
+	sysSpuThreadInitialize(&thread[index].id, group_id, index, &image, &attr2, &arg2);
 
 	sysSpuThreadGroupStart(group_id);
 	sysSpuThreadGroupJoin(group_id, &cause, &status);
