@@ -58,51 +58,6 @@ int main(int argc, char* argv[]) {
 	calculate_fractal(result, &params);
 	print_values(result);
 
-	/*
-	printf("\n\nSPU CODE:\n");
-	int spu_result[HEIGHT*WIDTH];
-	calculate_with_spu(spu_result, &params);
-	print_values(spu_result);
-
-	printf("\n\nSPU CODE in 2 passes:\n");
-	int spu_result2[HEIGHT*WIDTH];
-	int chunk_size = HEIGHT/2;
-	params.pixel_height = chunk_size;
-	int offset;
-
-	offset = chunk_size * 0;
-	params.max_im -= (y_step * offset);
-	calculate_with_spu(&spu_result2[offset*params.pixel_width], &params);
-
-	offset = chunk_size * 1;
-	params.max_im -= (y_step * offset);
-	calculate_with_spu(&spu_result2[offset*params.pixel_width], &params);
-	print_values(spu_result2);
-
-	printf("\n\nSPU CODE in n passes:\n");
-	printf("\n\nfor n = 4\n");
-	int n = 4;
-	chunk_size = HEIGHT/n;
-	params.pixel_height = chunk_size;
-	for (int chunk = 0; chunk<n; chunk++) {
-		offset = chunk_size * chunk;
-		params.max_im = max_im - y_step * offset;
-		calculate_with_spu(&spu_result2[offset*params.pixel_width], &params);
-	}
-	print_values(spu_result2);
-
-	printf("\n\nSPU CODE in n passes:\n");
-	printf("\n\nfor n = 5\n");
-	n = 5;
-	chunk_size = HEIGHT/n;
-	params.pixel_height = chunk_size;
-	for (int chunk = 0; chunk<n; chunk++) {
-		offset = chunk_size * chunk;
-		params.max_im = max_im - y_step * offset;
-		calculate_with_spu(&spu_result2[offset*params.pixel_width], &params);
-	}
-	print_values(spu_result2);
-*/
 	printf("\n\nSPU CODE with bigger fractal:\n");
 	int width = 1920;
 	int height = 1080;
