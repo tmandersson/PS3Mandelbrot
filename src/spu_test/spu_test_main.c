@@ -105,8 +105,7 @@ void calculate_with_spus(void *result, struct fractal_params *params) {
 	u32 cause, status;
 	int priority = 100;
 	sysSpuThreadGroupAttribute grpattr = { 7+1, ptr2ea("fractal"), 0, 0 };
-	sysSpuThreadAttribute attr1 = { ptr2ea("f_threa1"), 8+1, SPU_THREAD_ATTR_NONE };
-	sysSpuThreadAttribute attr2 = { ptr2ea("f_threa2"), 8+1, SPU_THREAD_ATTR_NONE };
+	sysSpuThreadAttribute attr = { ptr2ea("f_thread"), 8+1, SPU_THREAD_ATTR_NONE };
 	sysSpuThreadArgument arg1 = { 0, 0, 0, 0 };
 	sysSpuThreadArgument arg2 = { 0, 0, 0, 0 };
 
@@ -127,7 +126,7 @@ void calculate_with_spus(void *result, struct fractal_params *params) {
 	result += ((params->pixel_height/6) * params->pixel_width) * sizeof(int) * index;
 	arg1.arg0 = ptr2ea(result);
 	arg1.arg1 = ptr2ea(&params1);
-	sysSpuThreadInitialize(&thread[index].id, group_id, index, &image, &attr1, &arg1);
+	sysSpuThreadInitialize(&thread[index].id, group_id, index, &image, &attr, &arg1);
 
 	index = 1;
 	static struct fractal_params params2 __attribute__((aligned(128)));
@@ -142,7 +141,7 @@ void calculate_with_spus(void *result, struct fractal_params *params) {
 	result += ((params->pixel_height/6) * params->pixel_width) * sizeof(int) * index;
 	arg2.arg0 = ptr2ea(result);
 	arg2.arg1 = ptr2ea(&params2);
-	sysSpuThreadInitialize(&thread[index].id, group_id, index, &image, &attr2, &arg2);
+	sysSpuThreadInitialize(&thread[index].id, group_id, index, &image, &attr, &arg2);
 
 	sysSpuThreadGroupStart(group_id);
 	sysSpuThreadGroupJoin(group_id, &cause, &status);
