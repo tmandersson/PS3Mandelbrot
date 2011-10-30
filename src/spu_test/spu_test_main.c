@@ -95,6 +95,7 @@ void *allocate_result_buffer(struct fractal_params *params) {
 
 struct thread_data {
 	u32 id;
+	sysSpuThreadArgument arg;
 };
 
 void calculate_with_spus(void *result, struct fractal_params *params) {
@@ -106,8 +107,6 @@ void calculate_with_spus(void *result, struct fractal_params *params) {
 	int priority = 100;
 	sysSpuThreadGroupAttribute grpattr = { 7+1, ptr2ea("fractal"), 0, 0 };
 	sysSpuThreadAttribute attr = { ptr2ea("f_thread"), 8+1, SPU_THREAD_ATTR_NONE };
-	sysSpuThreadArgument arg1 = { 0, 0, 0, 0 };
-	sysSpuThreadArgument arg2 = { 0, 0, 0, 0 };
 
 	sysSpuInitialize(6, 0);
 	sysSpuThreadGroupCreate(&group_id, thread_count, priority, &grpattr);
@@ -124,9 +123,11 @@ void calculate_with_spus(void *result, struct fractal_params *params) {
 	params1.max_iterations = params->max_iterations;
 
 	result += ((params->pixel_height/6) * params->pixel_width) * sizeof(int) * index;
-	arg1.arg0 = ptr2ea(result);
-	arg1.arg1 = ptr2ea(&params1);
-	sysSpuThreadInitialize(&thread[index].id, group_id, index, &image, &attr, &arg1);
+	thread[index].arg.arg0 = ptr2ea(result);
+	thread[index].arg.arg1 = ptr2ea(&params1);
+	thread[index].arg.arg2 = 0;
+	thread[index].arg.arg3 = 0;
+	sysSpuThreadInitialize(&thread[index].id, group_id, index, &image, &attr, &thread[index].arg);
 
 	index = 1;
 	static struct fractal_params params2 __attribute__((aligned(128)));
@@ -139,9 +140,11 @@ void calculate_with_spus(void *result, struct fractal_params *params) {
 	params2.max_iterations = params->max_iterations;
 
 	result += ((params->pixel_height/6) * params->pixel_width) * sizeof(int) * index;
-	arg2.arg0 = ptr2ea(result);
-	arg2.arg1 = ptr2ea(&params2);
-	sysSpuThreadInitialize(&thread[index].id, group_id, index, &image, &attr, &arg2);
+	thread[index].arg.arg0 = ptr2ea(result);
+	thread[index].arg.arg1 = ptr2ea(&params2);
+	thread[index].arg.arg2 = 0;
+	thread[index].arg.arg3 = 0;
+	sysSpuThreadInitialize(&thread[index].id, group_id, index, &image, &attr, &thread[index].arg);
 
 	sysSpuThreadGroupStart(group_id);
 	sysSpuThreadGroupJoin(group_id, &cause, &status);
