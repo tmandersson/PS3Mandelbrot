@@ -27,10 +27,10 @@ int main(int argc, char* argv[]) {
 
 	double start_real = -0.743643887037158704752191506114774;
 	double start_imag = 0.131825904205311970493132056385139;
-	double x_aspect = 1;
-	double y_aspect = 1;
-	double offset_real = x_aspect * 1.2;
-	double offset_imag = y_aspect * 1.2;
+	double x_aspect = 16;
+	double y_aspect = 9;
+	double offset_real = x_aspect * 0.1;
+	double offset_imag = y_aspect * 0.1;
 
 	double min_re, max_re, min_im, max_im;
 	min_re = start_real-offset_real;
