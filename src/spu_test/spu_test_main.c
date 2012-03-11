@@ -13,21 +13,17 @@
 #include <sys/process.h>
 SYS_PROCESS_PARAM(1001,0x400000);
 
-const int WIDTH = 20;
-const int HEIGHT = 20;
+const int WIDTH = 1920;
+const int HEIGHT = 1080;
 const unsigned int MAX_ITERATIONS = 256;
 
 #define ptr2ea(x)			((u64)((void*)(x)))
 
 void *allocate_result_buffer(struct fractal_params *params);
 void calculate_with_spus(void *result, struct fractal_params *params);
-void calculate_fractal(int *result, struct fractal_params *params);
-void print_values_wh(int *result, int width, int height);
-void print_values(int *result);
 void show_fractal_on_screen(int *result, int width, int height);
 
 int main(int argc, char* argv[]) {
-	printf("\nNON SPU CODE:\n");
 
 	double start_real = -0.743643887037158704752191506114774;
 	double start_imag = 0.131825904205311970493132056385139;
@@ -41,9 +37,10 @@ int main(int argc, char* argv[]) {
 	max_re = start_real+offset_real;
 	min_im = start_imag-offset_imag;
 	max_im = start_imag+offset_imag;
+
+	printf("\n\nSPU CODE with full-size fractal:\n");
 	double x_step = (max_re - min_re) / WIDTH;
 	double y_step = (max_im - min_im) / HEIGHT;
-	int result[HEIGHT*WIDTH];
 
 	static struct fractal_params params __attribute__((aligned(128)));
 	params.pixel_width = WIDTH;
@@ -54,26 +51,10 @@ int main(int argc, char* argv[]) {
 	params.y_step = y_step;
 	params.max_iterations = MAX_ITERATIONS;
 
-	calculate_fractal(result, &params);
-	print_values(result);
-
-	printf("\n\nSPU CODE with bigger fractal:\n");
-	int width = 1920;
-	int height = 1080;
-	x_step = (max_re - min_re) / width;
-	y_step = (max_im - min_im) / height;
-	params.pixel_width = width;
-	params.pixel_height = height;
-	params.min_re = min_re;
-	params.max_im = max_im;
-	params.x_step = x_step;
-	params.y_step = y_step;
-	params.max_iterations = MAX_ITERATIONS;
-
 	void *big_result = allocate_result_buffer(&params);
 	calculate_with_spus(big_result, &params);
-	printf("Calculated %i number of pixels...", height*width);
-	show_fractal_on_screen((int *)big_result, width, height);
+	printf("Calculated %i number of pixels...", WIDTH*HEIGHT);
+	show_fractal_on_screen((int *)big_result, WIDTH, HEIGHT);
 	free(big_result);
 
 	printf("\n\nExiting!\n");
@@ -136,79 +117,6 @@ void calculate_with_spus(void *result, struct fractal_params *params) {
 
 	sysSpuThreadGroupDestroy(group_id);
 	sysSpuImageClose(&image);
-}
-
-void print_values_wh(int *result, int width, int height) {
-	for (int y=0; y<height; y++) {
-		printf("Line: %i\n", y);
-		for (int x=0; x<width; x++)
-		{
-			int value = result[(y*width)+x];
-			if (value == 0)
-				printf("    ");
-			else
-				printf("%.3Xh", result[(y*width)+x]);
-		}
-		printf("\n");
-	}
-}
-
-void print_values(int *result) {
-	print_values_wh(result, WIDTH, HEIGHT);
-}
-
-unsigned int calculate(double c_re, double c_im, unsigned int max_iterations)
-{
-	double z_re, z_im;
-	z_re = z_im = 0;
-	unsigned iterations;
-	bool infinity = false;
-
-	// Stop when we maximum number of iterations is reached (part of Mandel set)
-	// or when we're certain that the iteration is going to reach infinity.
-	for (iterations = 0; iterations < max_iterations && !infinity; iterations++) {
-		// z = z*z + c;
-		double new_z_re, new_z_im;
-		new_z_re = ((z_re*z_re) - (z_im*z_im) + c_re);
-		new_z_im = ((z_re*z_im * 2) + c_im);
-		z_re = new_z_re;
-		z_im = new_z_im;
-
-		// We now that everything outside a circle with the radius of
-		// 2 is outside the Mandel set.
-		// Thus if the abs(z) > 2 then the iterations is going to reach infinity
-		if ((z_re*z_re + z_im*z_im) > 4)
-			infinity = true;
-	}
-
-	// if the iteration don't reach infinity then C is part of the	Mandel set
-	if (!infinity)
-		return 0;
-	else
-		return iterations;
-}
-
-void calculate_fractal(int *result, struct fractal_params *params) {
-	double re;
-	double im = params->max_im;
-	for (int y = 0; y < params->pixel_height; y++) {
-		if (y > 0) {
-			im -= params->y_step;
-		}
-		re = params->min_re; // start with the first pixel on the row
-
-		for (int x = 0; x < params->pixel_width; x++) {
-			if (x > 0)
-				re += params->x_step;
-
-			unsigned int iterations = calculate(re, im, params->max_iterations);
-
-			if ( iterations != 0)
-				result[y*params->pixel_width+x] = iterations;
-			else
-				result[y*params->pixel_width+x] = 0;
-		}
-	}
 }
 
 #define MAX_BUFFERS 2
