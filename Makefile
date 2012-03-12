@@ -36,7 +36,6 @@ LIBDIRS	:= $(PORTLIBS)
 export INCLUDE	:=	$(foreach dir,$(INCLUDES), -I$(CURDIR)/$(dir)) \
 					$(foreach dir,$(LIBDIRS),-I$(dir)/include) \
 					$(LIBPSL1GHT_INC) -I$(CURDIR)/include \
-					-I$(PS3DEV)/ppu/lib/gcc/powerpc64-ps3-elf/4.5.2/include \
 					-I$(CURDIR)
 #-- END PS3/PSL1GHT stuff -----------------------------------------
 
