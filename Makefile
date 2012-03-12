@@ -46,8 +46,7 @@ vpath %.h include include/core include/ps3
 
 .PHONY: spu.bin
 
-all: spu.bin.o ps3
-ps3: spu.bin.o mandel.self mandel.pkg spu_test.self spu_test.pkg
+all: spu.bin.o mandel.self mandel.pkg spu_test.self spu_test.pkg
 run:
 	ps3load mandel.self
 run_test:
