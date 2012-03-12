@@ -17,7 +17,7 @@ CC := $(CXX)
 CFLAGS = -g -O2 -Wall -mcpu=cell $(MACHDEP) $(INCLUDE)
 export LD	:=	$(CXX)
 LDFLAGS		=	$(MACHDEP) -Wl,-Map,$(notdir $@).map
-export BUILDDIR	:=	$(CURDIR)/ps3_build
+export BUILDDIR	:=	$(CURDIR)/build
 
 #---------------------------------------------------------------------------------
 # any extra libraries we wish to link with the project
@@ -53,7 +53,7 @@ run_test:
 	ps3load spu_test.self
 	
 mandel.self: mandel.elf
-mandel.elf: ps3_main.o rsxutil.o palette.o rsxplotter.o mandel.o
+mandel.elf: main.o rsxutil.o palette.o rsxplotter.o mandel.o
 spu_test.self: spu_test.elf
 spu_test.elf: spu_test_main.o rsxutil.o rsxplotter.o palette.o spu.bin.o
 
@@ -77,5 +77,5 @@ spu.bin:
 	
 clean: clean-all
 clean-all:
-	  -rm -f *.o *.elf *.self *.pkg *.bin spu_bin.h
+	  -rm -rf *.o *.elf *.self *.pkg *.bin spu_bin.h build
 	  @$(MAKE) -C src/spu clean 

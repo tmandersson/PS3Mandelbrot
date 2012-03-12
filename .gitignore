@@ -6,7 +6,7 @@ sdl_mandel
 *.elf
 *.self
 *.pkg
-ps3_build
+build
 spu_bin.h
 **/*/build
 *.bin
