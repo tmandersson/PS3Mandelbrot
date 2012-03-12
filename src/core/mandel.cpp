@@ -4,10 +4,8 @@
 #include <time.h>
 #include "core/mftb_profiling.h"
 #include <unistd.h>
-
-#ifdef __powerpc64__
-
 #include <sys/thread.h>
+
 const int CALCULATION_THREADS = 5;
 
 typedef sys_ppu_thread_t pthread_t;
@@ -26,13 +24,6 @@ int pthread_join (pthread_t __th, void **__thread_return) {
 	u64 ret_val;
 	return sysThreadJoin(__th, &ret_val);
 }
-
-#else
-
-#include <pthread.h>
-const int CALCULATION_THREADS = 16;
-
-#endif
 
 const unsigned int ITERATIONS = 256;
 
