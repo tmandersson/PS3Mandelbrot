@@ -9,12 +9,12 @@ TITLE		:=	Mandelbrot plotter
 APPID		:=	MANDELBRO
 CONTENTID	:=	TMAnd0-$(APPID)_00-0000000000000000
 
-PS3_CC := $(CXX)
+CC := $(CXX)
 
 # override MACHDEPT from ppu_rules
 # and disable some optimizations to allow profiling
 # MACHDEP = 
-PS3_CFLAGS = -g -O2 -Wall -mcpu=cell $(MACHDEP) $(INCLUDE)
+CFLAGS = -g -O2 -Wall -mcpu=cell $(MACHDEP) $(INCLUDE)
 export LD	:=	$(CXX)
 LDFLAGS		=	$(MACHDEP) -Wl,-Map,$(notdir $@).map
 export BUILDDIR	:=	$(CURDIR)/ps3_build
@@ -40,18 +40,13 @@ export INCLUDE	:=	$(foreach dir,$(INCLUDES), -I$(CURDIR)/$(dir)) \
 					-I$(CURDIR)
 #-- END PS3/PSL1GHT stuff -----------------------------------------
 
-#-- C/C++ linux sdl stuff -----------------------------------------
-CC = g++
-CPPFLAGS = -Wall -g -O3 -I$(CURDIR)/include
-#-- End C/C++ linux sdl stuff -----------------------------------------
-
-vpath %.cpp src src/core src/ps3 src/linux src/spu_test
-vpath %.c src src/core/ src/ps3 src/linux src/spu_test
-vpath %.h include include/core include/ps3 include/linux
+vpath %.cpp src src/core src/ps3 src/spu_test
+vpath %.c src src/core/ src/ps3 src/spu_test
+vpath %.h include include/core include/ps3
 
 .PHONY: spu.bin
 
-all: spu.bin.o sdl_mandel ps3
+all: spu.bin.o ps3
 ps3: spu.bin.o mandel.self mandel.pkg spu_test.self spu_test.pkg
 run:
 	ps3load mandel.self
@@ -59,20 +54,20 @@ run_test:
 	ps3load spu_test.self
 	
 mandel.self: mandel.elf
-mandel.elf: ps3_main.pso rsxutil.pso palette.pso rsxplotter.pso mandel.pso
+mandel.elf: ps3_main.o rsxutil.o palette.o rsxplotter.o mandel.o
 spu_test.self: spu_test.elf
-spu_test.elf: spu_test_main.pso rsxutil.pso rsxplotter.pso palette.pso spu.bin.o
+spu_test.elf: spu_test_main.o rsxutil.o rsxplotter.o palette.o spu.bin.o
 
 %.elf:
-	$(PS3_CC) $(PS3_CFLAGS) -o $@ $^ $(LIBS)
-%.pso: %.cpp %.h
-	$(PS3_CC) $(PS3_CFLAGS) -o $@ -c $<
-%.pso: %.cpp
-	$(PS3_CC) $(PS3_CFLAGS) -o $@ -c $<
-%.pso: %.c %.h
-	$(PS3_CC) $(PS3_CFLAGS) -o $@ -c $<
-%.pso: %.c
-	$(PS3_CC) $(PS3_CFLAGS) -o $@ -c $<
+	$(CC) $(CFLAGS) -o $@ $^ $(LIBS)
+%.o: %.cpp %.h
+	$(CC) $(CFLAGS) -o $@ -c $<
+%.o: %.cpp
+	$(CC) $(CFLAGS) -o $@ -c $<
+%.o: %.c %.h
+	$(CC) $(CFLAGS) -o $@ -c $<
+%.o: %.c
+	$(CC) $(CFLAGS) -o $@ -c $<
 	
 spu.bin:
 	@$(MAKE) -C src/spu
@@ -81,19 +76,7 @@ spu.bin:
 	@echo $(notdir $<)
 	@$(bin2o)
 	
-sdl_mandel: sdl_main.lo mandel.lo sdlplotter.lo palette.lo
-	$(CC) $(CPPFLAGS) -o $@ $^ `sdl-config --libs` -pg
-
-%.lo: %.cpp %.h
-	$(CC) $(CPPFLAGS) -o $@ -c $< -pg
-%.lo: %.cpp
-	$(CC) $(CPPFLAGS) -o $@ -c $< -pg
-%.lo: %.c %.h
-	$(CC) $(CPPFLAGS) -o $@ -c $< -pg
-%.lo: %.c
-	$(CC) $(CPPFLAGS) -o $@ -c $< -pg
-
 clean: clean-all
 clean-all:
-	  -rm -f mandel sdl_mandel *.o *.lo *.pso *.elf *.self *.pkg *.bin spu_bin.h
+	  -rm -f *.o *.elf *.self *.pkg *.bin spu_bin.h
 	  @$(MAKE) -C src/spu clean 
