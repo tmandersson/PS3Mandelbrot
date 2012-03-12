@@ -11,6 +11,8 @@
 #include "ps3/rsxutil.h"
 #include "ps3/rsxplotter.h"
 #include <sys/process.h>
+#include "core/mftb_profiling.h"
+
 SYS_PROCESS_PARAM(1001,0x400000);
 
 const int WIDTH = 1920;
@@ -68,6 +70,8 @@ void *allocate_result_buffer(struct fractal_params *params) {
 	void *result_buffer = malloc(size);
 
 	int *p = (int *) result_buffer;
+
+	// TODO: Not sure if this is really necessary. Try removing.
 	for (int i=0; i<params->pixel_width*params->pixel_height; i++)
 		p[i] = 0;
 
@@ -83,6 +87,8 @@ struct thread_data {
 const int thread_count = 6;
 
 void calculate_with_spus(void *result, struct fractal_params *params) {
+	mftbStart(start);
+
 	static struct thread_data thread[thread_count];
 	sysSpuImage image;
 	u32 group_id;
@@ -117,6 +123,8 @@ void calculate_with_spus(void *result, struct fractal_params *params) {
 
 	sysSpuThreadGroupDestroy(group_id);
 	sysSpuImageClose(&image);
+
+	mftbStop(start,stop);
 }
 
 #define MAX_BUFFERS 2
