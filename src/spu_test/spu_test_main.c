@@ -20,10 +20,10 @@ const int HEIGHT = 1080;
 const unsigned int MAX_ITERATIONS = 256;
 
 #define ptr2ea(x)			((u64)((void*)(x)))
+#define MAX_BUFFERS 2
 
 void *allocate_result_buffer(struct fractal_params *params);
 void calculate_with_spus(void *result, struct fractal_params *params);
-void show_fractal_on_screen(int *result, int width, int height);
 
 int main(int argc, char* argv[]) {
 
@@ -54,9 +54,75 @@ int main(int argc, char* argv[]) {
 	params.max_iterations = MAX_ITERATIONS;
 
 	void *big_result = allocate_result_buffer(&params);
-	calculate_with_spus(big_result, &params);
+
+	gcmContextData *context;
+	void *host_addr = NULL;
+	rsxBuffer buffers[MAX_BUFFERS];
+	int current_buffer = 0;
+	padInfo padinfo;
+	padData paddata;
+	u16 width;
+	u16 height;
+	int i;
+
+	/* Allocate a 1Mb buffer, aligned to a 1Mb boundary
+	* to be our shared IO memory with the RSX. */
+	host_addr = memalign (1024*1024, HOST_SIZE);
+	context = initScreen (host_addr, HOST_SIZE);
+	ioPadInit(7);
+
+	getResolution(&width, &height);
+	for (i = 0; i < MAX_BUFFERS; i++)
+		makeBuffer( &buffers[i], width, height, i);
+
+	printf("Resolution: %i x %i\n", width, height);
+	printf("Video init done.\n");
+
+	flip(context, MAX_BUFFERS - 1);
+	Palette palette = Palette();
+	RSXPlotter plotter = RSXPlotter(&buffers[current_buffer], palette);
+	waitFlip();
+
+	// plot fractal here
+	calculate_with_spus(&buffers[current_buffer], &params);
 	printf("Calculated %i number of pixels...", WIDTH*HEIGHT);
-	show_fractal_on_screen((int *)big_result, WIDTH, HEIGHT);
+
+	/*
+	for (int y = 0; y<HEIGHT; y++)
+		for (int x = 0; x<WIDTH; x++) {
+			int fractal_value = (int) ((int *)big_result)[(y*WIDTH)+x];
+			int value = fractal_value == 0 ? 0 : 1;
+			plotter.plot(x, y, value);
+		}
+	*/
+
+	flip(context, buffers[current_buffer].id);
+	waitFlip();
+
+	while(1) {
+		// check for user input for exit
+		ioPadGetInfo(&padinfo);
+		for(i=0; i<MAX_PADS; i++) {
+			if(padinfo.status[i]) {
+				ioPadGetData(i, &paddata);
+
+				if(paddata.BTN_START)
+					goto end;
+			}
+		}
+	}
+
+	end:
+
+	gcmSetWaitFlip(context);
+	for (i = 0; i < MAX_BUFFERS; i++)
+		rsxFree(buffers[i].ptr);
+
+	rsxFinish(context, 1);
+	free(host_addr);
+	ioPadEnd();
+
+
 	free(big_result);
 
 	printf("\n\nExiting!\n");
@@ -125,72 +191,4 @@ void calculate_with_spus(void *result, struct fractal_params *params) {
 	sysSpuImageClose(&image);
 
 	mftbStop(start,stop);
-}
-
-#define MAX_BUFFERS 2
-
-void show_fractal_on_screen(int *fractal, int fractal_width, int fractal_height) {
-	gcmContextData *context;
-	void *host_addr = NULL;
-	rsxBuffer buffers[MAX_BUFFERS];
-	int current_buffer = 0;
-	padInfo padinfo;
-	padData paddata;
-	u16 width;
-	u16 height;
-	int i;
-
-	printf("Running Mandel video test!\n");
-
-	/* Allocate a 1Mb buffer, aligned to a 1Mb boundary
-	* to be our shared IO memory with the RSX. */
-	host_addr = memalign (1024*1024, HOST_SIZE);
-	context = initScreen (host_addr, HOST_SIZE);
-	ioPadInit(7);
-
-	getResolution(&width, &height);
-	for (i = 0; i < MAX_BUFFERS; i++)
-		makeBuffer( &buffers[i], width, height, i);
-
-	printf("Resolution: %i x %i\n", width, height);
-	printf("Video init done.\n");
-
-	flip(context, MAX_BUFFERS - 1);
-	Palette palette = Palette();
-	RSXPlotter plotter = RSXPlotter(&buffers[current_buffer], palette);
-	waitFlip();
-
-	// plot fractal here
-	for (int y = 0; y<fractal_height; y++)
-		for (int x = 0; x<fractal_width; x++) {
-			int fractal_value = (int) fractal[(y*fractal_width)+x];
-			int value = fractal_value == 0 ? 0 : 1;
-			plotter.plot(x, y, value);
-		}
-
-	flip(context, buffers[current_buffer].id);
-	waitFlip();
-
-	while(1) {
-		// check for user input for exit
-		ioPadGetInfo(&padinfo);
-		for(i=0; i<MAX_PADS; i++) {
-			if(padinfo.status[i]) {
-				ioPadGetData(i, &paddata);
-
-				if(paddata.BTN_START)
-					goto end;
-			}
-		}
-	}
-
-	end:
-
-	gcmSetWaitFlip(context);
-	for (i = 0; i < MAX_BUFFERS; i++)
-		rsxFree(buffers[i].ptr);
-
-	rsxFinish(context, 1);
-	free(host_addr);
-	ioPadEnd();
 }
