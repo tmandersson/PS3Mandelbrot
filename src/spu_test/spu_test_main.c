@@ -84,18 +84,16 @@ int main(int argc, char* argv[]) {
 	waitFlip();
 
 	// plot fractal here
-	calculate_with_spus(&buffers[current_buffer], &params);
+	calculate_with_spus(buffers[current_buffer].ptr, &params);
 	printf("Calculated %i number of pixels...", WIDTH*HEIGHT);
-
-	/*
+/*
 	for (int y = 0; y<HEIGHT; y++)
 		for (int x = 0; x<WIDTH; x++) {
 			int fractal_value = (int) ((int *)big_result)[(y*WIDTH)+x];
 			int value = fractal_value == 0 ? 0 : 1;
 			plotter.plot(x, y, value);
 		}
-	*/
-
+*/
 	flip(context, buffers[current_buffer].id);
 	waitFlip();
 
