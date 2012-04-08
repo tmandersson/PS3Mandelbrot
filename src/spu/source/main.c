@@ -56,7 +56,6 @@ void transfer_data() {
 	wait_for_completion(dma_tag);
 }
 
-// TODO: Share code with PPU side instead.
 unsigned int calculate(double c_re, double c_im, unsigned int max_iterations)
 {
 	double z_re, z_im;
@@ -68,13 +67,12 @@ unsigned int calculate(double c_re, double c_im, unsigned int max_iterations)
 	// or when we're certain that the iteration is going to reach infinity.
 	for (iterations = 0; iterations < max_iterations && !infinity; iterations++) {
 		// z = z*z + c;
-		double new_z_re, new_z_im;
-		new_z_re = ((z_re*z_re) - (z_im*z_im) + c_re);
-		new_z_im = ((z_re*z_im * 2) + c_im);
-		z_re = new_z_re;
-		z_im = new_z_im;
+		double temp_z_re;
+		temp_z_re = ((z_re*z_re) - (z_im*z_im) + c_re);
+		z_im = ((z_re*z_im * 2) + c_im);
+		z_re = temp_z_re;
 
-		// We now that everything outside a circle with the radius of
+		// We know that everything outside a circle with the radius of
 		// 2 is outside the Mandel set.
 		// Thus if the abs(z) > 2 then the iterations is going to reach infinity
 		if ((z_re*z_re + z_im*z_im) > 4)
@@ -105,12 +103,12 @@ void calculate_fractal()
 			if (x > 0)
 				re += params.x_step;
 
-			//unsigned int iterations = calculate(re, im, params.max_iterations);
+			unsigned int iterations = calculate(re, im, params.max_iterations);
 
-			//if ( iterations != 0)
-			//	result[y*params.pixel_width+x-offset] = iterations;
-			//else
-			//	result[y*params.pixel_width+x-offset] = 0;
+			if ( iterations != 0)
+				result[y*params.pixel_width+x-offset] = iterations;
+			else
+				result[y*params.pixel_width+x-offset] = 0;
 
 			transfer_size += sizeof(int);
 			if (transfer_size == max_calculation_size)
