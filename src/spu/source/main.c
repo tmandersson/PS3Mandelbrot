@@ -31,8 +31,8 @@ int main(uint64_t dest_addr, uint64_t param_addr, uint64_t arg3, uint64_t arg4)
 	wait_for_completion(dma_tag);
 
 	destination = dest_addr;
-	calculate_fractal();
-	transfer_data();
+	calculate_fractal(); // calculate and transfer result
+	transfer_data(); // transfer result left over in buffer
 
 	spu_thread_exit(0);
 	return 0;
@@ -105,12 +105,12 @@ void calculate_fractal()
 			if (x > 0)
 				re += params.x_step;
 
-			unsigned int iterations = calculate(re, im, params.max_iterations);
+			//unsigned int iterations = calculate(re, im, params.max_iterations);
 
-			if ( iterations != 0)
-				result[y*params.pixel_width+x-offset] = iterations;
-			else
-				result[y*params.pixel_width+x-offset] = 0;
+			//if ( iterations != 0)
+			//	result[y*params.pixel_width+x-offset] = iterations;
+			//else
+			//	result[y*params.pixel_width+x-offset] = 0;
 
 			transfer_size += sizeof(int);
 			if (transfer_size == max_calculation_size)

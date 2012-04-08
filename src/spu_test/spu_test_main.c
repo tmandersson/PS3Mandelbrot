@@ -151,8 +151,6 @@ struct thread_data {
 const int thread_count = 6;
 
 void calculate_with_spus(void *result, struct fractal_params *params) {
-	mftbStart(start);
-
 	static struct thread_data thread[thread_count];
 	sysSpuImage image;
 	u32 group_id;
@@ -182,11 +180,11 @@ void calculate_with_spus(void *result, struct fractal_params *params) {
 		sysSpuThreadInitialize(&thread[index].id, group_id, index, &image, &attr, &thread[index].arg);
 	}
 
+	mftbStart(start);
 	sysSpuThreadGroupStart(group_id);
 	sysSpuThreadGroupJoin(group_id, &cause, &status);
+	mftbStop(start,stop);
 
 	sysSpuThreadGroupDestroy(group_id);
 	sysSpuImageClose(&image);
-
-	mftbStop(start,stop);
 }
