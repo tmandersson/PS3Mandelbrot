@@ -63,12 +63,6 @@ unsigned int calculate(double c_re, double c_im, unsigned int max_iterations)
 	unsigned int iterations;
 	int infinity = 0;
 
-	// Optimization by checking of point _clearly_ is part of Mandelbrot set,
-	// without having to do timescape algo.
-	double q = (c_re - 1/4) * (c_re - 1/4) + c_im*c_im;
-	if ( (q * (q + (c_re - 1/4))) < (c_im * c_im) / 4 )
-		return 0;
-
 	// Stop when we maximum number of iterations is reached (part of Mandel set)
 	// or when we're certain that the iteration is going to reach infinity.
 	for (iterations = 0; iterations < max_iterations && !infinity; iterations++) {
