@@ -1,0 +1,14 @@
+Alright now SPU's is used. Old threading code is removed.
+
+A ton more clean up should be done. But I might have lost interest
+at this point. It was fun to play around with this from time to time
+as exercise. But it might be time I move on to something that has
+higher value...
+
+Anyone looking at my code or commit log should take it for what it is.
+Hackfest/learning/duct-tape code. Whole thing can be simplified
+to a lot fewer moving objects. Pointless design is left from what
+I used as a starting point. (Old highschool code.)
+
+Was cool to see that it was not impossible to get those SPU's
+working and getting hot though. :)
