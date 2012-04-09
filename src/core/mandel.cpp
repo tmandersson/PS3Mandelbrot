@@ -6,6 +6,11 @@
 #include <unistd.h>
 #include <sys/thread.h>
 
+#include <core/fractal_params.h>
+#include <sys/spu.h>
+#include "spu_bin.h"
+#define ptr2ea(x)			((u64)((void*)(x)))
+
 const int CALCULATION_THREADS = 5;
 
 typedef sys_ppu_thread_t pthread_t;
@@ -33,6 +38,53 @@ struct section_params {
 	double start_im;
 	Mandel *mandel_object;
 };
+
+struct thread_data {
+	u32 id;
+	sysSpuThreadArgument arg;
+	struct fractal_params params __attribute__((aligned(128)));
+};
+
+const int thread_count = 6;
+
+void calculate_with_spus(void *result, struct fractal_params *params) {
+	static struct thread_data thread[thread_count];
+	sysSpuImage image;
+	u32 group_id;
+	u32 cause, status;
+	int priority = 100;
+	sysSpuThreadGroupAttribute grpattr = { 7+1, ptr2ea("fractal"), 0, 0 };
+	sysSpuThreadAttribute attr = { ptr2ea("f_thread"), 8+1, SPU_THREAD_ATTR_NONE };
+
+	sysSpuInitialize(thread_count, 0);
+	sysSpuThreadGroupCreate(&group_id, thread_count, priority, &grpattr);
+	sysSpuImageImport(&image, spu_bin, SPU_IMAGE_PROTECT);
+
+	for(int index = 0; index < thread_count; index++) {
+		thread[index].params.pixel_width = params->pixel_width;
+		thread[index].params.pixel_height = params->pixel_height/thread_count;
+		thread[index].params.min_re = params->min_re;
+		thread[index].params.max_im = params->max_im - (params->y_step * thread[index].params.pixel_height * index);
+		thread[index].params.x_step = params->x_step;
+		thread[index].params.y_step = params->y_step;
+		thread[index].params.max_iterations = params->max_iterations;
+
+		void *thread_result = result + ((params->pixel_height/thread_count) * params->pixel_width) * sizeof(int) * index;
+		thread[index].arg.arg0 = ptr2ea(thread_result);
+		thread[index].arg.arg1 = ptr2ea(&thread[index].params);
+		thread[index].arg.arg2 = 0;
+		thread[index].arg.arg3 = 0;
+		sysSpuThreadInitialize(&thread[index].id, group_id, index, &image, &attr, &thread[index].arg);
+	}
+
+	//mftbStart(start);
+	sysSpuThreadGroupStart(group_id);
+	sysSpuThreadGroupJoin(group_id, &cause, &status);
+	//mftbStop(start,stop);
+
+	sysSpuThreadGroupDestroy(group_id);
+	sysSpuImageClose(&image);
+}
 
 Mandel::Mandel(int width, int height, IPlotter &plotter) : _plotter(plotter)
 {
@@ -92,6 +144,16 @@ void Mandel::paint()
 			printf("ERROR: Thread join failed!\n");
 		}
 	}
+
+	static struct fractal_params fract_params __attribute__((aligned(128)));
+	fract_params.pixel_width = _width;
+	fract_params.pixel_height = _height;
+	fract_params.min_re = _min_re;
+	fract_params.max_im = _max_im;
+	fract_params.x_step = _x_step;
+	fract_params.y_step = _y_step;
+	fract_params.max_iterations = _max_iterations;
+	calculate_with_spus(_plotter.getSurface()->ptr, &fract_params);
 
 	_plotter.UnlockAndUpdateSurface();
 

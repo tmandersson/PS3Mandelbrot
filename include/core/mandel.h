@@ -1,11 +1,14 @@
 #ifndef MANDEL_H_
 #define MANDEL_H_
 
+#include "ps3/rsxutil.h"
+
 class IPlotter {
 public:
 	virtual void LockSurface() = 0;
 	virtual void UnlockAndUpdateSurface() = 0;
 	virtual void plot(int x, int y, int color) = 0;
+	virtual rsxBuffer *getSurface() = 0;
 };
 
 class Mandel {

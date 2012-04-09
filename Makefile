@@ -52,7 +52,7 @@ run_test: spu_test.self
 	ps3load spu_test.self
 	
 mandel.self: mandel.elf
-mandel.elf: main.o rsxutil.o palette.o rsxplotter.o mandel.o
+mandel.elf: main.o rsxutil.o palette.o rsxplotter.o mandel.o spu.bin.o
 spu_test.self: spu_test.elf
 spu_test.elf: spu_test_main.o rsxutil.o rsxplotter.o palette.o spu.bin.o
 

@@ -12,6 +12,7 @@ class RSXPlotter : public IPlotter {
 	void UnlockAndUpdateSurface() {}
 	void plot(int x, int y, int color);
 	void setSurface(rsxBuffer *surface);
+	rsxBuffer *getSurface();
  private:
 	rsxBuffer *_surface;
 	Palette &_palette;

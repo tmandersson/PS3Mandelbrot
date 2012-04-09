@@ -12,11 +12,15 @@ RSXPlotter::RSXPlotter(rsxBuffer *surface,
 
 void RSXPlotter::plot(int x, int y, int color) {
 	u32 argb = GetXRGB32(_palette.GetR(color), _palette.GetG(color), _palette.GetB(color));
-	putpixel(_surface, x, y, argb);
+	//putpixel(_surface, x, y, argb);
 }
 
 void RSXPlotter::setSurface(rsxBuffer *surface) {
 	_surface = surface;
+}
+
+rsxBuffer *RSXPlotter::getSurface() {
+	return _surface;
 }
 
 u32 GetXRGB32(int r, int g, int b) {
