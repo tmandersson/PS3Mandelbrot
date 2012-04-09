@@ -113,38 +113,6 @@ void Mandel::paint()
 	_x_step = (_max_re - _min_re) / _width;
 	_y_step = (_max_im - _min_im) / _height;
 
-	int sections = CALCULATION_THREADS;
-
-	int section_limit;
-	int old_section_limit;
-	section_limit = 0;
-
-	pthread_t threads[sections];
-	section_params params[sections];
-	for (int section_id = 0; section_id < sections; section_id++)
-	{
-		old_section_limit = section_limit;
-		section_limit = (_height/sections)*(section_id + 1);
-
-		params[section_id].mandel_object = this;
-		params[section_id].start_pixel_row = old_section_limit;
-		params[section_id].end_pixel_row = section_limit;
-		params[section_id].start_im = _max_im - (old_section_limit * _y_step);
-
-	    int rc = pthread_create(&threads[section_id], NULL, call_calculate_section, (void *)&params[section_id]);
-	    if (rc) {
-	    	printf("ERROR; return code from pthread_create() is %d\n", rc);
-	    	exit(-1);
-	    }
-	}
-
-	for (int section_id = 0; section_id < sections; section_id++)
-	{
-		if (pthread_join(threads[section_id], NULL) != 0) {
-			printf("ERROR: Thread join failed!\n");
-		}
-	}
-
 	static struct fractal_params fract_params __attribute__((aligned(128)));
 	fract_params.pixel_width = _width;
 	fract_params.pixel_height = _height;
